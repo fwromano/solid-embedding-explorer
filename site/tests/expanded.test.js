@@ -56,11 +56,14 @@ test('playback advances the physical request rather than collapsing continuous a
   assert.equal(state.heading,301);
 });
 
-test('expanded methods and coverage never imply a ten-shape supervised training cohort',()=>{
+test('expanded methods distinguish ten-shape exploratory PLS from original semantic fits',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.doesNotMatch(html,/five solids × six paints|max="66600"/);
   assert.match(html,/Original five-solid/);
-  assert.match(html,/new shapes projected out of cohort/);
+  assert.match(html,/new shapes projected out of cohort for those fits/);
+  assert.match(html,/PLS is refitted on all 94,200 views across ten shapes/);
+  assert.match(html,/no held-out accuracy claim/);
+  assert.match(html,/sphere supplies no pose signal/);
   assert.match(html,/full rotational alias/);
   const js=readFileSync(new URL('../app.js',import.meta.url),'utf8');
   assert.match(js,/source_dataset/);

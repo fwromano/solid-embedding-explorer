@@ -33,3 +33,7 @@ API virtual routes handled by explicit fetchStatic (not real HTTP): status from 
 Pure math module supplied independently: `new ExactDiagnostics(rows, float32Values, dimensions)`, `.neighbors(id,k=8)`, `.reference(id)`, `.gallery(id,k=8)`, and `maskIoU(firstUint8Array, secondUint8Array, id, other)`.
 
 The static site must remain under 1 GB (reserve frontend headroom), and the uncompressed deployment tar under 10 GB, per the current official Pages/action limits verified in evidence/official-pages-constraints.json. Individual Release assets must remain under 2 GiB. Verify actual bytes before upload. Large immutable data is distributed as a public GitHub Release asset, not oversized Git blobs. Git source branch is feat/public-solids-pages. Original github.io vehicle repository, local original/expanded data and local server pointers remain unchanged.
+
+## PLS refit release
+
+`data-pls-v2` uses derived build `build-4eed6e31d814bcd5f8122a14`. Its source catalog commitment still identifies the same original row/vector dataset. `provenance.pls_refit` records the new fitting policy and source-code hash. The twelve PLS bases/coordinate arrays and their catalog descriptors are replaced, with new build URLs and hashes throughout. All sixteen other projections and all media/vector assets retain their exact bytes. See [PLS-REFIT.md](PLS-REFIT.md) for the weighting and pose-availability policy.

@@ -21,6 +21,7 @@ RUNTIME_FILES = ('index.html', 'app.js', 'core.js', 'style.css', 'view-colors.js
 RELEASE_SCHEMA = 'solids-release-v1'
 SYNTHETIC_SCHEMA = 'solids-release-synthetic-test-v1'
 PRODUCTION_BUILD = 'build-81cec6a56ad50b85d5afc982'
+APPROVED_BUILDS = {PRODUCTION_BUILD, 'build-4eed6e31d814bcd5f8122a14'}
 PRODUCTION_COUNT = 94200
 PRODUCTION_SHA256 = '56dd1c2695c1724686d09d1b0312d64b3cd4719e39aa0794a4061f4a0fe85a34'
 SITE_LIMIT = 1_000_000_000
@@ -65,7 +66,7 @@ def validate_pins(value, *, release=False, allow_synthetic=False):
                 or not re.fullmatch('[0-9a-f]{64}', str(value.get('source_catalog_sha256', '')))):
             raise ValueError('invalid explicitly synthetic fixture')
     elif (schema != (RELEASE_SCHEMA if release else 'solids-static-v1')
-          or value.get('build_id') != PRODUCTION_BUILD or type(value.get('count')) is not int
+          or value.get('build_id') not in APPROVED_BUILDS or type(value.get('count')) is not int
           or value['count'] != PRODUCTION_COUNT or value.get('source_catalog_sha256') != PRODUCTION_SHA256):
         raise ValueError('production deployment pins mismatch')
     return synthetic
