@@ -1,0 +1,9 @@
+site/data/
+site/media/
+site/vectors/
+site/deployment.json
+artifacts/
+.cache/
+__pycache__/
+.pytest_cache/
+*.pyc

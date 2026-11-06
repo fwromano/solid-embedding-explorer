@@ -1,0 +1,89 @@
+/* Self-contained: the host loads this stylesheet once with view-map.js. */
+.view-map {
+  color-scheme: dark;
+  color: #dce6f5;
+  background: #101a2b;
+  border: 1px solid #33445f;
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-width: 0;
+  font: 12px/1.5 system-ui, sans-serif;
+}
+.view-map *, .view-map *::before, .view-map *::after { box-sizing: border-box; }
+.view-map [hidden] { display: none !important; }
+.view-map .view-map-title { margin: 0 0 14px; font-size: 13px; font-weight: 650; }
+.view-map .view-map-chart { position: relative; margin: 0 14px 0 38px; }
+.view-map .view-map-pad {
+  position: relative;
+  width: 100%;
+  height: clamp(130px, 18vw, 200px);
+  background: #111b2c;
+  border-radius: 3px;
+  outline: 1px solid #65758e;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+.view-map .view-map-gradient, .view-map .view-map-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.view-map .view-map-gradient { border-radius: 3px; }
+.view-map .view-map-overlay { overflow: visible; }
+.view-map .view-map-overlay * { vector-effect: non-scaling-stroke; }
+.view-map .view-map-grid { stroke: #ffffff40; stroke-width: 1; }
+.view-map .view-map-samples circle { stroke: #081121b3; stroke-width: .7; }
+.view-map .view-map-recorded { stroke: #fff; stroke-width: 2.5; filter: drop-shadow(0 0 1px #000); }
+.view-map .view-map-requested { fill: none; stroke: #fff; stroke-width: 1.5; filter: drop-shadow(0 0 1px #000); }
+.view-map .view-map-requested circle { stroke-dasharray: 2 2; }
+.view-map .view-map-heading-axis { display: flex; justify-content: space-between; margin-top: 12px; font-size: 10px; color: #b3c3d9; }
+.view-map .view-map-elevation-axis { position: absolute; left: -38px; top: 0; width: 30px; height: clamp(130px, 18vw, 200px); pointer-events: none; }
+.view-map .view-map-elevation-axis span { position: absolute; right: 0; transform: translateY(-50%); font-size: 10px; color: #b3c3d9; }
+.view-map .view-map-axis-title { text-align: center; font-size: 10px; color: #a8bad3; margin-top: 4px; }
+.view-map .view-map-readout { margin: 10px 0 4px; color: #e5edf8; font-variant-numeric: tabular-nums; }
+.view-map .view-map-help { margin: 5px 0 10px; color: #aebed5; font-size: 11px; }
+.view-map .view-map-colors { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0; }
+.view-map .view-map-color { display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; }
+.view-map .view-map-caption { color: #c8d4e8; font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.view-map input[type=color] { width: 32px; height: 28px; padding: 1px; border: 1px solid #65758e; border-radius: 5px; background: #111b2c; cursor: pointer; }
+.view-map .view-map-editor { border-top: 1px solid #33445f; padding-top: 8px; }
+.view-map .view-map-editor summary { cursor: pointer; color: #dce6f5; font-size: 12px; }
+.view-map .view-map-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.view-map button { font: inherit; color: #e5edf8; background: #19283e; border: 1px solid #65758e; border-radius: 5px; padding: 5px 9px; cursor: pointer; }
+.view-map button[aria-pressed=true] { background: #294367; border-color: #a8cfff; }
+.view-map .view-map-anchor-row { display: grid; grid-template-columns: 18px minmax(0,1fr) minmax(0,1fr); gap: 10px; align-items: center; margin-top: 8px; }
+.view-map .view-map-anchor-row label { display: flex; align-items: center; gap: 7px; min-width: 0; color: #b9cae0; font-size: 11px; }
+.view-map input[type=number] { width: 78px; min-width: 0; max-width: 100%; padding: 5px; border: 1px solid #65758e; border-radius: 5px; background: #0c1524; color: #e5edf8; font: inherit; font-variant-numeric: tabular-nums; }
+.view-map .view-map-handle {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%,-50%);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  text-shadow: 0 1px 2px #000, 0 -1px 2px #000, 1px 0 2px #000, -1px 0 2px #000;
+  box-shadow: 0 0 0 1px #081121;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 24px;
+  cursor: grab;
+  touch-action: none;
+}
+.view-map .view-map-handle:active { cursor: grabbing; }
+.view-map .view-map-pad[data-editing=true] { cursor: default; }
+.view-map :focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (max-width: 520px) {
+  .view-map { padding: 12px 10px; }
+  .view-map .view-map-chart { margin-right: 14px; }
+  .view-map .view-map-colors { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .view-map .view-map-anchor-row { gap: 6px; }
+  .view-map .view-map-anchor-row label { flex-wrap: wrap; gap: 3px; }
+  .view-map .view-map-caption { white-space: normal; }
+}
