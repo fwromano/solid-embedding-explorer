@@ -38,6 +38,7 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           OPENBLAS_NUM_THREADS: '1'
+          TMPDIR: ${{ runner.temp }}
         run: python -m pytest -p no:cacheprovider -W error tests/test_build_static_data.py tests/test_release_bundle.py tests/test_workflow.py -q
       - name: Download and verify pinned real data
         env:
