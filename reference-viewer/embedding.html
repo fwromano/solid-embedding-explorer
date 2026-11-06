@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head><link rel="icon" href="data:,">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vehicle sphere views · embedding atlas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%239d86ff' stroke-width='3'/%3E%3Ccircle cx='24' cy='9' r='4' fill='%23f8ca56'/%3E%3C/svg%3E">
+<style>
+:root{color-scheme:dark;--bg:#0b101a;--panel:#111927;--line:#263449;--text:#edf2fa;--muted:#a4b3c9;--accent:#9d86ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% 0,#1a2440 0,transparent 45%),var(--bg);font:15px/1.5 system-ui,-apple-system,sans-serif;color:var(--text)}main{max-width:1560px;margin:auto;padding:32px 36px 24px}a{color:#bfc9ff;text-underline-offset:4px}header{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;margin-bottom:24px}.eyebrow{font-size:11px;letter-spacing:2.4px;font-weight:700;color:#a5b6d5;margin-bottom:10px}h1{font-size:clamp(28px,3vw,43px);line-height:1.15;letter-spacing:-1.4px;margin:0 0 10px;font-weight:650}.intro{color:var(--muted);margin:0;max-width:720px;font-size:15px}nav{display:flex;gap:20px;white-space:nowrap;padding-top:24px;font-size:13px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:18px}.panel{border:1px solid var(--line);border-radius:17px;background:var(--panel);overflow:hidden}.plot-head{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-size:15px;font-weight:650}.small{font-size:12px;color:var(--muted)}select,button{font:inherit;color:var(--text);background:#182336;border:1px solid #35435b;border-radius:8px;padding:8px 12px;cursor:pointer}button:hover{background:#263452}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #ccbaff;outline-offset:3px}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12px}.toolbar select{font-size:12px;padding:6px 8px}.toolbar label{display:flex;gap:5px;align-items:center}#plot{height:clamp(240px,calc(100vh - 660px),580px);width:100%}.plot-foot{padding:0 22px 18px;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}.legend{display:flex;gap:15px}.legend span{display:flex;align-items:center;gap:6px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%}.controls{border-top:1px solid var(--line);padding:18px 22px 20px;background:#131d2d}.control-head{display:flex;gap:18px;align-items:center;justify-content:space-between}.heading-readout{display:flex;align-items:baseline;gap:12px}.heading-readout strong{font-variant-numeric:tabular-nums;font-size:34px;font-weight:500;letter-spacing:-1px}.actions{display:flex;gap:8px;align-items:center}.play{background:var(--accent);color:#0b101a;font-weight:700;min-width:82px;border:0}.play:hover{background:#b6a4ff}input[type=range]{width:100%;accent-color:var(--accent);height:26px;margin-top:12px;cursor:ew-resize}.ticks{display:flex;justify-content:space-between}.ticks button{font-size:11px;border:0;padding:3px 0;background:transparent;color:var(--muted)}.side{display:flex;flex-direction:column}.side-top{padding:20px 20px 12px}.color-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}.color-picker button{font-size:11px;padding:9px 2px;background:#162033;display:flex;flex-direction:column;gap:6px;align-items:center}.color-picker button[aria-pressed=true]{border-color:var(--accent);background:#232b43;box-shadow:inset 0 0 0 1px var(--accent)}.color-picker .dot{width:13px;height:13px}.image-wrap{height:250px;margin:4px 16px 0;border:1px solid #2b3a4f;border-radius:11px;background:linear-gradient(45deg,#182230 25%,transparent 25%,transparent 75%,#182230 75%),linear-gradient(45deg,#182230 25%,#131c29 25%,#131c29 75%,#182230 75%);background-size:20px 20px;background-position:0 0,10px 10px;display:flex;align-items:center;justify-content:center;position:relative}.image-wrap img{max-width:100%;max-height:100%;object-fit:contain}.image-tag{position:absolute;bottom:8px;left:8px;border-radius:5px;padding:2px 7px;font-size:10px;background:#0c121ce0;color:#cfdaea}.side-info{padding:16px 20px 20px;flex:1}.view-line{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.view-line strong{font-size:20px;font-weight:550}.badge{border:1px solid #3a4b66;color:#c2d0e7;font-size:11px;padding:3px 8px;border-radius:20px}.meta{font-size:12px;color:var(--muted);word-break:break-word}.coordinates{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:16px 0}.coordinate{background:#182335;border-radius:8px;padding:9px 10px}.coordinate b{font-size:10px;font-weight:500;color:var(--muted);display:block}.coordinate span{font-size:15px;font-variant-numeric:tabular-nums}.similarity{display:flex;justify-content:space-between;font-size:12px;gap:15px;padding:10px 0;border-top:1px solid var(--line)}.similarity strong{font-variant-numeric:tabular-nums}.caption{font-size:12px;color:var(--muted);margin:12px 0 0}.source-link{font-size:12px;display:inline-block;margin-top:12px}.notes{margin:18px 0 0;padding:16px 20px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px}.notes summary{cursor:pointer;color:#d7e0ef;font-size:13px}.notes p{margin:10px 0 0}.notes a{margin-right:16px}footer{display:flex;justify-content:space-between;gap:12px;margin-top:16px;color:#7f93b1;font-size:11px}.status{font-size:12px;color:#b9c9df;min-height:18px}#reset{font-size:11px;padding:4px 8px} @media(max-width:1080px){main{padding:24px 20px}.layout{grid-template-columns:minmax(0,1fr) 320px}.plot-head{align-items:flex-start;flex-direction:column}#plot{height:clamp(240px,calc(100vh - 740px),450px)}.legend{gap:9px}.image-wrap{height:215px}}@media(max-width:800px){main{padding:20px 14px}header{flex-direction:column;gap:8px}nav{padding:0}.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side-top{grid-column:1/-1}.image-wrap{height:230px;margin:0 0 18px 16px}.side-info{padding-top:0}.plot-head{padding:16px 16px 0}#plot{height:400px}.controls{padding:16px}.heading-readout strong{font-size:28px}.heading-readout{gap:6px}.actions select{max-width:85px}footer{flex-direction:column}}@media(max-width:480px){.side{display:block}.image-wrap{margin:0 16px;height:240px}.side-info{padding-top:16px}.toolbar{font-size:11px}.legend{flex-wrap:wrap}.heading-readout .small{display:none}}
+#plot{position:relative;overflow:hidden}#plot canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.image-wrap canvas{width:100%;height:100%;object-fit:contain}.plot-tooltip{position:absolute;display:none;background:#0b101af0;color:#edf2fa;padding:5px 8px;border:1px solid #35435b;border-radius:5px;font-size:11px;pointer-events:none;z-index:3}
+#colors label{display:block;font-size:12px;margin-top:10px}#colors select{width:100%;margin-top:4px}#legend{max-height:52px;overflow:auto;flex-wrap:wrap}.view-line strong{font-size:16px}.camera-preview{height:180px;padding:12px;display:flex;align-items:center;justify-content:center;background:#172232}.camera-preview img{height:150px;width:auto;image-rendering:pixelated}#camera-sample{max-width:100%}
+.view-pad{position:relative;width:100%;margin:12px 0 2px;background:#101929;border:1px solid #35435b;border-radius:10px;touch-action:none;cursor:crosshair;outline-offset:3px}.view-pad:focus-visible{outline:2px solid var(--accent)}.view-pad svg{display:block;width:100%;height:154px;user-select:none}.view-pad .grid{stroke:#fff;stroke-opacity:.3;stroke-width:.7}.view-pad text{fill:#a4b3c9;font:10px system-ui}.view-pad .samples{stroke:#0b101a;stroke-width:.7}.view-pad .request{stroke:#fff;stroke-width:1.5;fill:none;filter:drop-shadow(0 0 1px #000)}.view-pad .recorded{stroke:#fff;stroke-width:1.5;filter:drop-shadow(0 0 1px #000)}.view-pad-help{font-size:11px;color:#a4b3c9;margin:4px 0 8px}.heading-readout strong{font-size:25px}.heading-readout{flex-wrap:wrap;gap:8px}
+
+.comparison{width:100%;border:1px solid #35435b;border-radius:9px;padding:8px 10px;background:#101929}.comparison summary{cursor:pointer;color:#d7e0ef;font-size:12px;font-weight:600}.comparison summary span{color:#a4b3c9;font-weight:400}.comparison-actions{display:flex;gap:6px;margin:8px 0}.comparison-actions button{font-size:11px;padding:4px 8px}#legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:114px;overflow:auto;gap:4px 10px}#legend label{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;white-space:nowrap;padding:3px;border-radius:4px}#legend label[data-inspected=true]{background:#263452}#legend input{accent-color:var(--accent);margin:0}#legend .sample-count{margin-left:auto;color:#a4b3c9;font-size:10px}.comparison-actions button:focus-visible{outline:2px solid var(--accent)}
+.view-color-anchors{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:11px;color:#c8d4e8;margin:6px 0}.view-color-anchors label{display:flex;gap:6px;align-items:center;cursor:pointer}.view-color-anchors input[type=color]{width:32px;height:26px;padding:1px;border:1px solid #65758e;border-radius:5px;background:#111b2c;cursor:pointer}.view-color-anchors input[type=color]:focus-visible{outline:2px solid #fff;outline-offset:2px}.anchor-dot{width:9px;height:9px;border-radius:3px;display:inline-block}.view-color-anchors[data-unknown=true]{opacity:.65}.palette-picker{display:flex;align-items:center;gap:6px;margin-right:8px}.palette-picker select{font-size:11px;padding:5px 8px}.anchor-label{font-weight:400}.view-color-anchors{align-items:center}</style>
+
+<style>
+#legend.legend-groups{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;max-height:340px;align-items:start}
+.legend-group{min-width:0;border:1px solid #2e3d54;border-radius:10px;padding:10px;background:#131e30}
+.legend-group-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+#legend .legend-group-head label{font-size:12px;gap:7px;flex:1;min-width:0;padding:0}
+#legend .group-count{display:inline;margin-left:auto;font-size:10px;font-variant-numeric:tabular-nums;color:#93a8c3}
+.legend-group-head button{padding:3px 8px;font-size:10px}
+.legend-paints{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+#legend .legend-paints label{padding:6px 7px;border:1px solid #2c3b52;border-radius:6px;background:#101a2b;min-width:0;gap:5px}
+#legend .legend-paints label:has(input:checked){background:#1d2b42;border-color:#496183;color:#edf2fa}
+#legend .legend-paints label[data-inspected=true]{box-shadow:inset 0 0 0 1px var(--accent)}
+.plot-head{align-items:flex-start;flex-wrap:wrap}.toolbar{gap:8px}.toolbar [hidden]{display:none!important}
+#embedding-dimension-control{font-weight:600;color:#d3def1}
+@media(max-width:640px){#legend.legend-groups{grid-template-columns:1fr;max-height:420px}.legend-paints{grid-template-columns:repeat(auto-fit,minmax(min(100%,105px),1fr))}}
+</style>
+<style>.paint-focus{display:flex;align-items:center;gap:8px;font-size:11px;margin:8px 0 12px}.paint-focus select{font-size:11px;padding:5px 8px}.view-slices{border-top:1px solid #2e3d54;padding:10px 0;margin-bottom:12px}.view-slices summary span{display:block;margin:3px 0;color:#93a8c3;font-size:10px}.slice-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:10px}.slice-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.slice-head select{font-size:10px;padding:4px 6px;max-width:75%}.slice-actions{display:flex;gap:6px;margin:7px 0}.slice-actions button{font-size:10px;padding:3px 7px}.slice-chips{display:flex;flex-wrap:wrap;gap:4px}.slice-chips label{display:flex;align-items:center;gap:4px;font-size:10px;padding:4px 6px;border:1px solid #30425e;border-radius:5px;cursor:pointer;background:#111d30}.slice-chips label:has(input:checked){border-color:#56739e;background:#253654}.slice-chips input{margin:0;accent-color:var(--accent)}@media(max-width:640px){.slice-columns{grid-template-columns:1fr}}.image-wrap{cursor:grab;touch-action:pan-y;user-select:none}.image-wrap.scrubbing{cursor:grabbing}.image-tag{pointer-events:none}#jeep-preview:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.cutout-help{margin:8px 20px 0}</style><style>.pca-fit-info{margin:10px 20px 0}.plot-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 20px 12px}.plot-navigation button{font-size:12px;padding:5px 9px}.plot-navigation output{min-width:48px;text-align:center;font:12px monospace}#pca-fit-control{display:flex;gap:6px;align-items:center}.toolbar select{max-width:100%}#pca-fit-control[hidden]{display:none}</style><link rel="stylesheet" href="new-data/additions.css?v=62bf549ad0b0c508"><style>html{scrollbar-gutter:stable}header nav{flex-wrap:wrap;white-space:normal}#encoder-comparison-link{font-weight:700}</style></head>
+<body><main>
+<header><div><div class="eyebrow">SAM 3.1 VEHICLE MASKS + SIM2 REFERENCE / CLIP B/16</div><h1>Explore vehicle views across the hemisphere.</h1><p class="intro">Each camera view is a point in a 512-dimensional space. Choose a model/color, azimuth and elevation. All selections use one shared PCA basis fitted to Sim2 Jeep features and the SAM-masked sphere crops.</p></div><nav><a id="fusion-study-link" href="fusion/">EG2 + DINO fusion ↗</a><a id="encoder-comparison-link" href="encoder-comparison/">Compare CLIP · EG2 · DINOv3 ↗</a><a id="labels-link" href="#">Mask comparison ↗</a><a id="cache-link" href="#">Evaluation data ↗</a></nav></header>
+<div class="layout">
+<section class="panel" aria-label="Embedding projection">
+<div class="plot-head"><div><div class="title">A shared space for Sim2 and the vehicle scans</div><div class="small" id="variance"></div></div><div class="toolbar"><label id="pca-fit-control" hidden>Projection <select id="pca-fit" aria-label="Projection fit"></select></label><select id="embedding-model" aria-label="Embedding model" hidden></select><label id="embedding-dimension-control" hidden>Nested size <select id="embedding-dimensions" aria-label="Gemma embedding dimensions"></select></label><select id="projection" aria-label="PCA projection"><option value="3d">3D · PC1 / PC2 / PC3</option><option value="01">2D · PC1 / PC2</option><option value="02">2D · PC1 / PC3</option><option value="12">2D · PC2 / PC3</option></select><select id="view-palette" aria-label="Viewpoint palette"></select><select id="point-color" aria-label="Color PCA points by"><option value="viewpoint">Color · angle + elevation</option><option value="series">Color · vehicle / paint</option></select><label><input id="all-headings" type="checkbox" checked>All headings</label><label><input id="all-elevations" type="checkbox" checked>All elevations</label><label><input id="paths" type="checkbox">Heading paths</label></div></div>
+<p class="small pca-fit-info" id="pca-fit-info"></p><p class="small" id="selection-depth-status" aria-live="polite"></p><div id="plot" aria-label="PCA point cloud and heading paths"></div><div class="plot-navigation"><button id="zoom-out" aria-label="Zoom out">−</button><output id="zoom-level" aria-label="Plot zoom">1.0×</output><button id="zoom-in" aria-label="Zoom in">+</button><button id="focus-point">Zoom to inspected point</button><button id="fit-visible">Fit visible</button><label class="point-size-control">Point size <input id="point-size" type="range" min="1" max="5" step="0.25" aria-label="Plot point size"></label><span class="small">Scroll to zoom · Shift-drag to pan · drag to orbit in 3D</span></div>
+<div class="plot-foot"><details class="comparison" open><summary>Comparison matrix <span id="visible-count"></span></summary><div class="comparison-actions"><button id="only-series">Only inspected</button><button id="all-series">Show all</button><button id="clear-series">Clear</button></div><label class="paint-focus">Paint across selected vehicles <select id="paint-focus" aria-label="Paint across selected vehicle groups"><option value="all">All paints</option><option value="custom">Custom pairs</option></select></label><details class="view-slices" open><summary>Heading × elevation <span id="slice-summary"></span></summary><div class="slice-columns"><section><div class="slice-head"><strong>Heading</strong><select id="heading-mode" aria-label="Heading comparison mode"><option value="all">All recorded</option><option value="current">Follow inspected view</option><option value="selected">Selected targets</option></select></div><div class="slice-actions"><button id="heading-front-rear" type="button">Front + rear</button><button id="heading-none" type="button">Clear headings</button></div><div id="heading-choices" class="slice-chips" role="group" aria-label="Comparison headings"></div></section><section><div class="slice-head"><strong>Elevation</strong><select id="elevation-mode" aria-label="Elevation comparison mode"><option value="all">All recorded</option><option value="current">Follow inspected view</option><option value="selected">Selected elevations</option></select></div><div class="slice-actions"><button id="elevation-none" type="button">Clear elevations</button></div><div id="elevation-choices" class="slice-chips" role="group" aria-label="Comparison elevations"></div></section></div><p class="small">Choose vehicle/paint pairs below. Heading targets use the nearest recorded view in each included elevation ring; no new views are interpolated. Filters keep the PCA basis fixed.</p></details><p id="comparison-count-help" class="comparison-count-help">Shown on graph / available views · 2,520 = 360 headings × 7 elevations per scan color.</p><div class="legend" aria-describedby="comparison-count-help" id="legend" role="group" aria-label="Vehicle and color visibility"></div></details><span id="color-key" class="small"></span><span>Drag to orbit · click a measured point <button id="reset">Reset view</button></span></div>
+<div class="controls"><div class="control-head"><div class="heading-readout"><strong id="heading-text">0°</strong><span class="small">requested view</span></div><div class="actions"><button id="play" class="play" aria-pressed="false">▶ Play</button><select id="speed" aria-label="Rotation speed"><option value="15">15° / sec</option><option value="30" selected>30° / sec</option><option value="60">60° / sec</option></select></div></div><div id="view-pad" class="view-pad" tabindex="0" role="group" aria-label="Requested camera view: angle and elevation" aria-describedby="view-pad-help"><svg viewBox="0 0 460 154" preserveAspectRatio="none" aria-hidden="true"><image id="view-gradient" preserveAspectRatio="none" x="42" y="14" width="400" height="106"/><g id="view-grid"></g><g id="view-samples" class="samples"></g><circle id="view-recorded" class="recorded" r="4"/><g id="view-request" class="request"><circle r="7"/><path d="M-11 0H11M0-11V11"/></g></svg></div><div id="view-color-anchors" class="view-color-anchors" role="group" aria-label="Choose the four corner colors"><label><input type="color" data-view-anchor="bottomLeft" aria-label="Color at heading 0, elevation -5">0°, −5°</label><label><input type="color" data-view-anchor="topLeft" aria-label="Color at heading 0, elevation 90">0°, 90°</label><label><input type="color" data-view-anchor="topRight" aria-label="Color at heading 180, elevation 90">180°, 90°</label><label><input type="color" data-view-anchor="bottomRight" aria-label="Color at heading 180, elevation -5">180°, −5°</label><span class="small">HSV blend · click a swatch</span></div><p id="view-pad-help" class="view-pad-help">Drag left/right for angle and up/down for elevation. Crosshair: requested · outlined dot: recorded view. Arrow keys adjust the view; Shift uses larger steps.</p><input id="heading" aria-label="Relative viewing heading" type="range" min="0" max="360" step="1" value="0"><div class="ticks"><button data-angle="0">0° · front</button><button data-angle="90">90° · side</button><button data-angle="180">180° · rear</button><button data-angle="270">270° · side</button><button data-angle="360">360° · front</button></div></div>
+</section>
+<aside class="panel side" aria-label="Selected vehicle view"><div class="side-top"><div class="title">The view behind the point</div><div id="colors"><label>Series<select id="series" aria-label="Dataset model and color"></select></label><label>Elevation<select id="elevation" aria-label="Viewing elevation"></select></label></div></div><div class="image-wrap"><canvas id="jeep-preview" width="256" height="176" role="img" tabindex="0" aria-describedby="cutout-help" title="Drag left/right to change heading" aria-label="Selected rendered vehicle crop"></canvas><span class="image-tag">SAM CUTOUT / FRESH EMBEDDING</span></div><p id="cutout-help" class="small cutout-help">Drag the vehicle left/right to change heading. ← / → keys; Shift for 15° steps.</p><div class="side-info"><div class="view-line"><strong id="selected-view"></strong><span class="badge" id="mismatch"></span></div><div class="meta" id="image-name"></div><div class="meta" id="row-info"></div><div class="coordinates" id="coordinates"></div><div class="similarity"><span id="reference-label">Cosine to front view</span><strong id="similarity"></strong></div><p class="caption" id="view-note"></p><a class="source-link" id="original" target="_blank" rel="noopener">Open original PNG ↗</a><div class="status" id="status" role="status"></div></div></aside>
+</div>
+<details class="notes"><summary>What this picture shows</summary><p>This new PCA basis was fitted to <strong>4,931 normalized embeddings (1,404 unchanged Sim2 Jeep references + 3,527 SAM 3.1 masked sphere images)</strong>. Raw SAM 3.1 masks preserve the model output without closing or hole filling. Sphere CLIP features are freshly encoded from RGB crops padded to a square with background [127,127,127], preserving the complete silhouette through CLIP preprocessing; the preview displays the matching transparent RGBA cutout. Moose and Wolf are excluded. Changing series, elevation or axes does not refit this basis. The image and highlighted point always refer to the same cached embedding row. All cached points are shown by default, including repeated Sim2 captures at the same heading. Tick vehicles/colors independently under Vehicles on graph, or use Only inspected to focus on one series. All elevations shows every recorded view for each ticked series; turn it off to inspect one elevation. Heading paths connect views within each elevation ring, never across elevations. Checking a vehicle on the graph previews that vehicle. Removing the previewed vehicle switches to another visible vehicle; clearing the graph clears its preview. Changing the inspected image does not remove other comparison series. Choose the four viewpoint colors with the swatches at (0°, −5°), (0°, 90°), (180°, 90°), and (180°, −5°). Colors blend through vivid hues between the four corners, retaining your exact chosen colors at the corners. Hue turns are aligned across the entire grid to avoid abrupt seams; saturation and brightness stay tied to your chosen colors. Editing a swatch applies the same blend to the grid and PCA points. The default uses red, blue, green and yellow, with green at (0°, 90°) and yellow at (180°, −5°): opposite corners of the view grid. Presets provide starting colors. Custom colors persist in the view URL and this browser. Each PCA point uses the color at its recorded heading/elevation, shared across objects. Heading colors fold from 0° to 180° and back to 360°, where the color matches 0°. A 360° request selects the existing 0° image/vector. The archive has no underside view; the bottom row is the lowest recorded elevation (−5°). Sim2 uses an explicitly uncalibrated horizontal color band because its elevation is unknown. Vehicle / paint coloring remains available in the color selector.</p><p>Solid lines connect adjacent measured views separated by at most 5° in Sim2 or 15° in the scan grid. Dashed lines bridge missing angles and show the last-to-first wraparound as guides; they do not add images or embeddings. A 360° request returns the same sampled view as 0°. The data is not constrained to form a circle or a separated color cluster.</p><p>Distances use only the displayed projection axes. The cosine score uses the selected embedding size and the recorded reference view shown beside it. These points represent image features, not uncertainty distributions or unique vehicle identities. The Sim2 elevation remains uncalibrated. The new scans have filename elevations −5°, 0°, 18°, 36°, 54°, 72° and 90°. Their heading convention is visually inferred: relative heading = (270 − filename azimuth) modulo 360. The first filename parameter, 10, has unconfirmed distance units. At the pole, azimuth describes image orientation while the viewing ray is vertical.</p><p><a href="https://raw.githubusercontent.com/fwromano/fwromano.github.io/main/datasets/vehicle-sphere/embedding_offline.html" download="vehicle-scan-embedding-orbit.html">Download historical offline viewer (older dataset)</a><a href="projection.json" id="projection-data">Download PCA basis + coordinates</a><a id="methods-link" href="#">Dataset methods</a></p></details>
+<section class="notes" hidden><div class="title">Camera-matched crop replay</div><p>These samples use the existing SECTR-C camera geometry, physical target bounds and exact trajectory samples. The closest recorded viewing ray is rotated into the camera axes, then isotropically downsampled and independently re-encoded. The turquoise diamond plots the selected camera crop’s independently encoded feature in the same PCA basis; its connector leads to the chosen native scan feature. Pixel crops and embeddings are retained; no ROS or MHT likelihood is changed.</p><select id="camera-sample" aria-label="Camera replay sample"></select><div class="camera-preview"><img id="camera-crop" alt="Downsampled simulated observation crop"></div><p id="camera-description"></p><a href="camera/index.json">Download camera observation metadata</a></section><footer><span>4,931 cached crops · 25 series · fixed 512 → 3 projection</span><span>Interactive canvas · historical offline archive available</span></footer>
+</main>
+<script id="orbit-data" type="application/json">{}</script>
+<script src="new-data/compact-loader.js"></script>
+<script src="new-data/additions.js?v=c339329b96abce80"></script>
+<script data-interaction-version="4" src="new-data/view-controls.js?v=c5c61d1c32a17a05"></script>
+<script src="new-data/dinov3-adapter.js?v=8f1f40633f2a63d2"></script>
+<script>
+'use strict';
+(async()=>{
+const orbitData=await VehicleCompact.load();
+VehicleAdditions.extend(orbitData);
+const embeddingParams=new URLSearchParams(location.search),requestedEmbedding=embeddingParams.get('embedding');
+const requestedSpace=orbitData.embeddingSpaces?.[requestedEmbedding];
+const embeddingKey=requestedSpace?(requestedSpace.embeddingFamily||requestedEmbedding):'clip';
+const requestedDimension=Number(embeddingParams.get('dimensions')??(requestedSpace?.featureDimensions||768));
+const gemmaDimension=[768,512,256,128].includes(requestedDimension)?requestedDimension:768;
+const spaceKey=embeddingKey==='gemma2'?(orbitData.gemmaSpaceKeys?.[gemmaDimension]||'gemma2'):embeddingKey;
+const sourceSpace=orbitData.embeddingSpaces?.[spaceKey]||orbitData,$=id=>document.getElementById(id);
+// Clone rows: choosing presentation axes never mutates the retained reference data.
+const D={...sourceSpace,rows:sourceSpace.rows.map(row=>({...row,coords:[...row.coords]}))};
+window.D=D;
+let pcaKey=Object.hasOwn(D.pcaFits||{},embeddingParams.get('pca'))?embeddingParams.get('pca'):(D.defaultPcaFit||null);
+function applyPcaCoordinates(){
+ const fit=D.pcaFits?.[pcaKey];if(!fit)return;
+ if(fit.coords.length!==D.rows.length)throw new Error('PCA row alignment mismatch');
+ D.rows.forEach((row,i)=>row.coords=fit.coords[i]);D.ratio=fit.ratio;D.plotRanges=fit.plotRanges;
+ D.basisDimensions=fit.dimensions;D.projectionUrl=fit.projectionUrl;
+ D.varianceLabel=`fit-cohort variance shown · ${fit.label} · ${fit.fitCount.toLocaleString()} views`;
+}
+applyPcaCoordinates();
+if(orbitData.atlases)D.atlases=orbitData.atlases;
+const embeddingSelector=$('embedding-model'),dimensionSelector=$('embedding-dimensions');
+function preserveCamera(query){anchorPositions.write(query);query.set('pointSize',String(pointRadius));query.set('yaw',String(yaw));query.set('pitch',String(pitch));query.set('zoom',String(zoom));query.set('panX',String(panX));query.set('panY',String(panY))}
+function changeEmbedding(model,dimension=gemmaDimension){
+ stop();clearTimeout(urlTimer);
+ const next=new URL(location.href);next.searchParams.set('embedding',model);
+ next.searchParams.set('dimensions',String(dimension));if(pcaKey)next.searchParams.set('pca',pcaKey);
+ next.searchParams.set('color',color);next.searchParams.set('heading',String(angle));
+ next.searchParams.set('elevation',String(requestedElevation));next.searchParams.set('projection',mode);
+ writeSliceParams(next.searchParams);next.searchParams.set('paths',showPaths?'1':'0');
+ next.searchParams.set('colorBy',colorBy);next.searchParams.set('palette',palette);preserveCamera(next.searchParams);
+ next.searchParams.delete('show');
+ const target=orbitData.embeddingSpaces?.[model==='gemma2'?(orbitData.gemmaSpaceKeys?.[dimension]||model):model]||orbitData;
+ const shared=[...visibleSeries].filter(series=>Object.hasOwn(target.colors,series));
+ // Preserve visible comparisons when switching between embedding families.
+ if(visibleSeries.size&&!shared.length)shared.push(...Object.keys(target.colors));
+ for(const series of shared)next.searchParams.append('show',series);
+ if(!shared.length)next.searchParams.append('show','');
+ if(palette==='custom')for(const name of anchorNames)next.searchParams.set('anchor-'+name,rgbHex(viewAnchors[name]));
+ location.assign(next.href);
+}
+if(embeddingSelector&&orbitData.embeddingOptions){
+ embeddingSelector.hidden=false;
+ for(const option of orbitData.embeddingOptions)embeddingSelector.add(new Option(option.label,option.key));
+ embeddingSelector.value=embeddingKey;
+ embeddingSelector.onchange=()=>changeEmbedding(embeddingSelector.value);
+}
+if(dimensionSelector&&orbitData.embeddingDimensions){
+ for(const option of orbitData.embeddingDimensions)dimensionSelector.add(new Option(option.label,String(option.value)));
+ dimensionSelector.value=String(gemmaDimension);
+ $('embedding-dimension-control').hidden=embeddingKey!=='gemma2';
+ dimensionSelector.onchange=()=>changeEmbedding('gemma2',Number(dimensionSelector.value));
+}
+if(D.presentation){
+ document.querySelector('.eyebrow').textContent=D.presentation.title;
+ document.querySelector('.intro').textContent=D.presentation.intro;
+ document.querySelector('.plot-head .title').textContent=D.presentation.plotTitle;
+ document.querySelector('footer span').textContent=`${D.rows.length.toLocaleString()} cached crops · ${Object.keys(D.colors).length} series · fixed ${D.featureDimensions} → 3 projection`;
+ const notes=document.querySelector('details.notes p');
+ const common=notes.textContent.indexOf('The image and highlighted point');
+ notes.textContent=D.presentation.basisDescription+' '+(common>=0?notes.textContent.slice(common):'');
+ for(const note of document.querySelectorAll('details.notes p'))if(note.textContent.includes('complete 512-dimensional'))note.textContent=note.textContent.replace('complete 512-dimensional',`complete ${D.featureDimensions}-dimensional`);
+ $('projection-data').href=D.projectionUrl;
+}
+VehicleAdditions.mount(D,embeddingKey);
+const categories=Object.keys(D.colors),fullGroups=Object.fromEntries(categories.map(c=>[c,D.rows.filter(r=>r.category===c)]));
+const params=new URLSearchParams(location.search);
+const nearestElevation=value=>D.elevations.reduce((best,v)=>Math.abs(v-value)<Math.abs(best-value)?v:best,D.elevations[0]);
+let requestedElevation=Number(params.get('elevation')??54);
+if(!Number.isFinite(requestedElevation))requestedElevation=54;
+requestedElevation=Math.max(D.elevations[0],Math.min(D.elevations.at(-1),requestedElevation));
+let elevation=nearestElevation(requestedElevation);
+let groups,lookup,representatives;
+function rebuildViews(){groups=Object.fromEntries(categories.map(c=>[c,(()=>{const rows=fullGroups[c],exact=rows.filter(r=>r.elevation===null||r.elevation===elevation);if(exact.length)return exact;const delta=Math.min(...rows.map(r=>Math.abs(r.elevation-elevation)));return rows.filter(r=>Math.abs(Math.abs(r.elevation-elevation)-delta)<1e-7)})()]));lookup=Object.fromEntries(categories.map(c=>[c,Array.from({length:360},(_,a)=>nearest(c,a))]));representatives=Object.fromEntries(categories.map(c=>[c,[...new Map(groups[c].map(r=>[r.heading,r])).values()].sort((a,b)=>a.heading-b.heading)]));}
+const byRow=new Map(D.rows.map(r=>[r.embedding_row,r]));
+const byScanRow=new Map(D.rows.filter(r=>r.dataset==='scans').map(r=>[r.source_embedding_row,r]));
+let selectedCameraSample=null;
+
+const circular=(a,b)=>Math.abs((a-b+540)%360-180);
+const nearest=(c,a)=>groups[c].reduce((best,r)=>circular(r.heading,a)<circular(best.heading,a)?r:best,groups[c][0]);
+
+rebuildViews();
+let ranges=D.plotRanges||[0,1,2].map(i=>{const v=[...D.rows,...D.cameraSamples].map(r=>r.coords[i]),lo=Math.min(...v),hi=Math.max(...v);return[lo,hi]});
+
+let color=categories.includes(params.get('color'))?params.get('color'):D.defaultSeries;
+const visibleSeries=new Set(params.has('show')?params.getAll('show').filter(c=>categories.includes(c)):categories);
+if(visibleSeries.size&&!visibleSeries.has(color))color=[...visibleSeries].at(-1);
+let elevationMode=['all','current','selected'].includes(params.get('elevations'))?params.get('elevations'):'all';
+let headingMode=['all','current','selected'].includes(params.get('headings'))?params.get('headings'):'all';
+let allElevations=elevationMode==='all',allHeadings=headingMode==='all',showPaths=params.get('paths')==='1';
+const headingChoices=Array.from({length:24},(_,i)=>i*15),elevationChoices=D.elevations.map(String);
+function uncalibrated(category){return D.seriesMeta[category].elevationCalibrated===false||D.seriesMeta[category].dataset.startsWith('sim2')}
+if(categories.some(c=>uncalibrated(c)))elevationChoices.push('unknown');
+const selectedHeadings=new Set(params.getAll('atHeading').map(Number).filter(v=>headingChoices.includes(v)));
+const selectedElevations=new Set(params.getAll('atElevation').filter(v=>elevationChoices.includes(v)));
+const sliceCache=new Map();
+function writeSliceParams(p){
+ p.set('elevations',elevationMode);p.set('headings',headingMode);p.delete('atElevation');p.delete('atHeading');
+ if(elevationMode==='selected')for(const value of [...selectedElevations].sort())p.append('atElevation',value);
+ if(headingMode==='selected')for(const value of [...selectedHeadings].sort((a,b)=>a-b))p.append('atHeading',String(value));
+}
+function comparisonPoints(c){
+ const key=[elevationMode,elevation,[...selectedElevations].sort().join(','),headingMode,headingMode==='current'?angle:0,[...selectedHeadings].sort((a,b)=>a-b).join(',')].join('|');
+ if(sliceCache.get(c)?.key===key)return sliceCache.get(c).points;
+ let points=elevationMode==='all'?fullGroups[c]:elevationMode==='current'?groups[c]:fullGroups[c].filter(r=>selectedElevations.has(String(r.elevation??'unknown')));
+ if(headingMode!=='all'){
+  const targets=headingMode==='current'?[angle]:[...selectedHeadings],rings=new Map(),ids=new Set();
+  for(const row of points){const key=D.seriesMeta[c].continuousPose?'continuous':row.elevation;const ring=rings.get(key)||[];ring.push(row);rings.set(key,ring)}
+  for(const ring of rings.values())for(const target of targets){
+   const nearest=ring.reduce((best,r)=>circular(r.heading,target)<circular(best.heading,target)?r:best,ring[0]);
+   for(const row of ring)if(row.heading===nearest.heading)ids.add(row.embedding_row);
+  }
+  points=points.filter(r=>ids.has(r.embedding_row));
+ }
+ sliceCache.set(c,{key,points});return points;
+}
+function comparisonView(c,a){
+ const points=comparisonPoints(c);if(!points.length)return null;
+ if(D.seriesMeta[c].continuousPose){const rad=Math.PI/180,score=r=>Math.sin(r.elevation*rad)*Math.sin(requestedElevation*rad)+Math.cos(r.elevation*rad)*Math.cos(requestedElevation*rad)*Math.cos((r.heading-a)*rad);return points.reduce((best,r)=>score(r)>score(best)?r:best,points[0]);}
+ const distance=r=>[r.elevation===null?0:Math.abs(r.elevation-requestedElevation),circular(r.heading,a)];
+ return points.reduce((best,r)=>{const x=distance(r),b=distance(best);return x[0]<b[0]||x[0]===b[0]&&x[1]<b[1]?r:best},points[0]);
+}
+function paintOf(c){return c.split('/').at(-1).trim().toLowerCase()}
+let colorBy=params.get('colorBy')==='series'?'series':'viewpoint';
+// One mapping drives the matrix, each measured sample and its PCA point.
+// Editable colors at headings 0/180 and elevations -5/90; globally aligned HSV hues preserve vivid colors and all four endpoints.
+const defaultPalette='red-blue-green-yellow';
+const viewPalettes={
+ 'red-blue-green-yellow':{label:'Red / blue / green / yellow',names:{topLeft:'green',topRight:'red',bottomLeft:'blue',bottomRight:'yellow'},anchors:{topLeft:[0,166,81],topRight:[230,57,70],bottomLeft:[38,98,255],bottomRight:[255,212,0]}},
+ 'teal-violet':{label:'Teal × violet',names:{topLeft:'teal',topRight:'pale blue',bottomLeft:'slate',bottomRight:'violet'},anchors:{topLeft:[95,208,184],topRight:[218,227,237],bottomLeft:[101,113,131],bottomRight:[180,160,229]}},
+ 'blue-amber':{label:'Blue × amber',names:{topLeft:'blue',topRight:'ivory',bottomLeft:'slate',bottomRight:'amber'},anchors:{topLeft:[104,174,223],topRight:[240,226,200],bottomLeft:[101,113,131],bottomRight:[228,181,108]}},
+ 'custom-corners':{label:'Green / red / orange / black',names:{topLeft:'green',topRight:'red',bottomLeft:'orange',bottomRight:'black'},anchors:{topLeft:[0,166,81],topRight:[230,57,70],bottomLeft:[245,140,35],bottomRight:[0,0,0]}}
+};
+const anchorNames=['bottomLeft','topLeft','topRight','bottomRight'];
+const rgbHex=rgb=>'#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('');
+const hexRgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
+const validHex=value=>typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value);
+let savedAnchors=null;
+try{savedAnchors=JSON.parse(localStorage.getItem('vehicle-view-hsv-colors'))}catch{}
+const customAnchors=Object.fromEntries(anchorNames.map(name=>{
+ const url=params.get('anchor-'+name),saved=savedAnchors?.[name];
+ return [name,validHex(url)?hexRgb(url):validHex(saved)?hexRgb(saved):[...viewPalettes[defaultPalette].anchors[name]]];
+}));
+viewPalettes.custom={label:'My colors · vivid blend',anchors:customAnchors};
+let palette=Object.hasOwn(viewPalettes,params.get('palette'))?params.get('palette'):
+ (anchorNames.some(name=>params.has('anchor-'+name))?'custom':defaultPalette);
+let viewAnchors=viewPalettes[palette].anchors;
+const anchorPositions=VehicleViewControls.positions(params,anchorNames,D.elevations[0],D.elevations.at(-1));
+function toHsv(rgb){
+ const [r,g,b]=rgb.map(v=>v/255),v=Math.max(r,g,b),lo=Math.min(r,g,b),d=v-lo;
+ const h=d===0?0:v===r?((g-b)/d+6)%6:v===g?(b-r)/d+2:(r-g)/d+4;
+ return [h*60,v===0?0:d/v,v];
+}
+function fromHsv([h,s,v]){
+ const c=v*s,x=c*(1-Math.abs(((h%360+360)%360)/60%2-1)),m=v-c;
+ const sector=Math.floor(((h%360+360)%360)/60);
+ return [[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][sector].map(n=>Math.round(255*(n+m)));
+}
+function prepareViewHsv(anchors){
+ const hsv=Object.fromEntries(Object.entries(anchors).map(([name,rgb])=>[name,toHsv(rgb)]));
+ const positions={bottomLeft:[0,0],bottomRight:[1,0],topLeft:[0,1],topRight:[1,1]};
+ const colored=anchorNames.filter(name=>hsv[name][1]>0&&hsv[name][2]>0);
+ // Gray has no hue; black also borrows saturation so it fades a color rather than graying it.
+ for(const name of anchorNames)if(hsv[name][1]===0&&colored.length){
+  const distance=other=>positions[name].reduce((sum,v,i)=>sum+(v-positions[other][i])**2,0);
+  const neighbor=colored.reduce((best,other)=>distance(other)<distance(best)?other:best,colored[0]);
+  hsv[name][0]=hsv[neighbor][0];if(hsv[name][2]===0)hsv[name][1]=hsv[neighbor][1];
+ }
+ // Align hue turns ONCE for the whole grid. Choosing shortest arcs per pixel creates seams.
+ // Minimize the total squared hue travel around the four edges, preserving every corner.
+ const bl=hsv.bottomLeft[0];let best=null,bestCost=Infinity;
+ for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-2;c<=2;c++){
+  const tl=hsv.topLeft[0]+360*a,br=hsv.bottomRight[0]+360*b,tr=hsv.topRight[0]+360*c;
+  const cost=(tl-bl)**2+(br-bl)**2+(tr-tl)**2+(tr-br)**2;
+  if(cost<bestCost){bestCost=cost;best={topLeft:tl,bottomRight:br,topRight:tr};}
+ }
+ for(const [name,hue]of Object.entries(best))hsv[name][0]=hue;
+ return hsv;
+}
+let viewHsv=anchorPositions.custom?VehicleViewControls.prepareHsv(viewAnchors,anchorPositions,toHsv,anchorNames):prepareViewHsv(viewAnchors);
+function viewpointColor(heading,elevation){
+ if(anchorPositions.custom)return VehicleViewControls.color(heading,elevation,anchorPositions,viewHsv,fromHsv,anchorNames);
+ const h=((heading%360)+360)%360,x=(h<=180?h:360-h)/180;
+ const y=elevation===null?.5:Math.max(0,Math.min(1,(elevation-D.elevations[0])/(D.elevations.at(-1)-D.elevations[0])));
+ const weights={bottomLeft:(1-x)*(1-y),bottomRight:x*(1-y),topLeft:(1-x)*y,topRight:x*y};
+ const hsv=[0,1,2].map(i=>anchorNames.reduce((sum,name)=>sum+weights[name]*viewHsv[name][i],0));
+ return `rgb(${fromHsv(hsv).join(' ')})`;
+}
+let viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
+const pointColor=row=>colorBy==='viewpoint'?viewpointColors.get(row.embedding_row):D.colors[row.category];
+const seriesCheckboxes=new Map();
+const selectionGroups=new Map();
+const fullRings=Object.fromEntries(categories.map(c=>{const rings=new Map();for(const r of fullGroups[c]){if(!rings.has(r.elevation))rings.set(r.elevation,new Map());if(!rings.get(r.elevation).has(r.heading))rings.get(r.elevation).set(r.heading,r)}return[c,[...rings.values()].map(r=>[...r.values()].sort((a,b)=>a.heading-b.heading))]}));
+let angle=Math.round(Math.max(0,Math.min(360,Number(params.get('heading'))||0)));
+let mode=['3d','01','02','12'].includes(params.get('projection'))?params.get('projection'):'3d';
+let pointRadius=Math.max(1,Math.min(5,Number(params.get('pointSize'))||2));
+let selected=null,playing=false,continuous=angle,lastFrame=0,lastUpdate=0,urlTimer=0;
+function cameraParameter(key,fallback,lo=-Infinity,hi=Infinity){const value=Number(params.get(key)??fallback);return Number.isFinite(value)?Math.max(lo,Math.min(hi,value)):fallback}
+let yaw=cameraParameter('yaw',-.65),pitch=cameraParameter('pitch',.55,-1.3,1.3),zoom=cameraParameter('zoom',1,.05,128),panX=cameraParameter('panX',0,-1000,1000),panY=cameraParameter('panY',0,-1000,1000),plotWidth=0,plotHeight=0,screenPoints=[],screenSegments=[],staticFrame=0;
+let pendingRow=null,displayBusy=false,prefetchBusy=false,activeSheet=null;
+const sheets=new Map(),loading=new Map(),MAX_SHEETS=3;
+const plot=$('plot'),base=document.createElement('canvas'),overlay=document.createElement('canvas'),tooltip=document.createElement('div');
+base.setAttribute('aria-hidden','true');overlay.setAttribute('role','img');overlay.setAttribute('aria-label','PCA projection; drag to rotate and click a measured view');tooltip.className='plot-tooltip';const pointLayer=document.createElement('canvas');overlay.style.zIndex='2';plot.append(base,pointLayer,overlay,tooltip);const scatterRenderer=VehicleViewControls.renderer(pointLayer,params.get('renderer')||'auto');pointLayer.addEventListener('webglcontextlost',()=>scheduleStatic());pointLayer.addEventListener('webglcontextrestored',()=>scheduleStatic());
+const ctx=base.getContext('2d'),marker=overlay.getContext('2d'),preview=$('jeep-preview').getContext('2d');
+const coordinateValues=[];
+for(let i=0;i<3;i++){const e=document.createElement('div');e.className='coordinate';const b=document.createElement('b');b.textContent=`PC${i+1}`;const span=document.createElement('span');e.append(b,span);$('coordinates').append(e);coordinateValues.push(span);}
+function syncUrl(){clearTimeout(urlTimer);urlTimer=setTimeout(()=>{const p=new URLSearchParams({processing:VehicleAdditions.processing,color,heading:String(angle),elevation:String(requestedElevation),projection:mode,elevations:allElevations?'all':'current',paths:showPaths?'1':'0',colorBy,palette});if(orbitData.embeddingOptions){p.set('embedding',embeddingKey);p.set('dimensions',String(gemmaDimension));preserveCamera(p)}if(pcaKey)p.set('pca',pcaKey);if(palette==='custom')for(const name of anchorNames)p.set('anchor-'+name,rgbHex(viewAnchors[name]));for(const c of categories)if(visibleSeries.has(c))p.append('show',c);if(!visibleSeries.size)p.append('show','');writeSliceParams(p);history.replaceState(null,'','?'+p)},150);}
+function state(){window.orbitState={observerProcessing:VehicleAdditions.processing,observationId:selected?.observation_id??null,variant:selected?.processing??null,embeddingModel:embeddingKey,featureDimensions:D.featureDimensions||512,basisDimensions:D.basisDimensions||D.featureDimensions||512,pcaFit:pcaKey,pcaFitRows:D.pcaFits?.[pcaKey]?.fitCount??null,pcaRatio:[...D.ratio],pcaProjectionUrl:D.projectionUrl,camera:{yaw,pitch,zoom,panX,panY},plotRanges:ranges,heading:angle,elevation,requestedElevation,visibleSeries:[...visibleSeries],allElevations,allHeadings,elevationMode,headingMode,selectedHeadings:[...selectedHeadings],selectedElevations:[...selectedElevations],showPaths,colorBy,palette,anchors:Object.fromEntries(anchorNames.map(name=>[name,rgbHex(viewAnchors[name])])),pointRadius,anchorPositions:structuredClone(anchorPositions.points),interpolation:anchorPositions.custom?'HSV (movable circular-distance anchors)':'HSV (globally aligned hues)',selectedColor:selected?pointColor(selected):null,selectedElevation:selected?.elevation??null,color,mode,previewSeries:selected?.category??null,selectedRow:selected?.embedding_row??null,selectedHeading:selected?.heading??null,coords:selected?[...selected.coords]:[],playing,markerRow:selected?.embedding_row??null,imageRow:selected?.embedding_row??null,pendingRow:pendingRow?.embedding_row??null,previewSheets:sheets.size};}
+function evict(){while(sheets.size>MAX_SHEETS){const key=[...sheets.keys()].find(k=>k!==activeSheet);if(key===undefined)break;sheets.delete(key)}}
+async function loadSheet(path){if(sheets.has(path)){const img=sheets.get(path);sheets.delete(path);sheets.set(path,img);return img}if(loading.has(path))return loading.get(path);
+ const job=(async()=>{const img=new Image();img.src=D.atlases?.[path]||path;await img.decode();sheets.set(path,img);evict();return img})();loading.set(path,job);try{return await job}finally{loading.delete(path)}}
+function prefetch(){if(!playing||prefetchBusy||!selected)return;const next=lookup[color][(angle+15)%360];if(!next)return;if(next.preview_sheet===selected.preview_sheet||sheets.has(next.preview_sheet))return;prefetchBusy=true;loadSheet(next.preview_sheet).catch(()=>{}).finally(()=>{prefetchBusy=false})}
+function planarScale(){const ax=[+mode[0],+mode[1]];return Math.min((plotWidth-104)/(ranges[ax[0]][1]-ranges[ax[0]][0]),(plotHeight-104)/(ranges[ax[1]][1]-ranges[ax[1]][0]))*zoom}
+function project(coords){return VehicleViewControls.projector(ranges,mode,yaw,pitch,zoom,panX,panY,plotWidth,plotHeight)(coords)}
+function zoomAt(factor,x=plotWidth/2,y=plotHeight/2){
+ const before=zoom;zoom=Math.max(.05,Math.min(128,zoom*factor));const ratio=zoom/before;
+ panX=(x-(x-plotWidth*(.5+panX))*ratio)/plotWidth-.5;
+ panY=(y-(y-plotHeight*(.5+panY))*ratio)/plotHeight-.5;
+ scheduleStatic();state();syncUrl();syncZoom();
+}
+function syncZoom(){if($('zoom-level'))$('zoom-level').textContent=zoom.toFixed(zoom<10?1:0)+'×'}
+function resetCamera(){yaw=-.65;pitch=.55;zoom=1;panX=panY=0;staticPlot();state();syncUrl();syncZoom()}
+function focusSelected(){if(!selected)return;const p=project(selected.coords);panX+=(plotWidth/2-p.x)/plotWidth;panY+=(plotHeight/2-p.y)/plotHeight;zoomAt(2)}
+function line(a,b,color,width=1,dashed=false){if(mode==='3d'){screenSegments.push({a,b,fill:color,width,dashed});return;}ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dashed?[4,5]:[]);ctx.stroke();ctx.setLineDash([])}
+function axes(){window.gridDepthState=null;ctx.font='11px system-ui';ctx.fillStyle='#a4b3c9';if(mode!=='3d'){
+ const ax=[+mode[0],+mode[1]],pad=52,scale=planarScale(),mid=ranges.map(r=>(r[0]+r[1])/2);
+ for(let i=0;i<=4;i++){
+  const x=pad+(plotWidth-pad*2)*i/4,y=plotHeight-pad-(plotHeight-pad*2)*i/4;
+  line({x,y:pad},{x,y:plotHeight-pad},'#263449');line({x:pad,y},{x:plotWidth-pad,y},'#263449');
+  const vx=mid[ax[0]]+(x-plotWidth*(.5+panX))/scale,vy=mid[ax[1]]-(y-plotHeight*(.5+panY))/scale;
+  const digits=Math.min(6,Math.max(2,Math.ceil(Math.log10(zoom))+2));
+  ctx.fillText(vx.toFixed(digits),x-12,plotHeight-pad+18);ctx.fillText(vy.toFixed(digits),8,y+4);
+ }
+ ctx.textAlign='center';ctx.fillText(axisCaption(ax[0]),plotWidth/2,plotHeight-10);
+ ctx.save();ctx.translate(11,plotHeight/2);ctx.rotate(-Math.PI/2);ctx.fillText(axisCaption(ax[1]),0,0);ctx.restore();ctx.textAlign='left';return}
+ const planes=VehicleViewControls.backPlanes(ranges,yaw,pitch),origin=planes.corner;window.gridDepthState=planes;
+ for(let axis=0;axis<3;axis++){
+  const end=[...origin];end[axis]=planes.opposite[axis];line(project(origin),project(end),'#50627f');
+  const p=project(end);ctx.fillText(axisCaption(axis),p.x+4,p.y+4);
+  for(let step=0;step<=4;step++)for(let other=axis+1;other<3;other++){
+   const a=[...origin],b=[...origin];a[axis]=b[axis]=ranges[axis][0]+(ranges[axis][1]-ranges[axis][0])*step/4;
+   b[other]=planes.opposite[other];line(project(a),project(b),'#263449');
+  }
+ }
+}
+function staticPlot(){
+ const renderStarted=performance.now();staticFrame=0;if(!plotWidth)return;ctx.globalAlpha=1;ctx.clearRect(0,0,plotWidth,plotHeight);screenSegments=[];axes();screenPoints=[];
+ const projectPoint=VehicleViewControls.projector(ranges,mode,yaw,pitch,zoom,panX,panY,plotWidth,plotHeight);
+ const counts={},plottedElevations={};
+ for(const c of categories){if(!visibleSeries.has(c))continue;const rows=comparisonPoints(c),points=[];
+  for(const row of rows){const p=projectPoint(row.coords);p.row=row;p.fill=pointColor(row);p.radius=pointRadius;points.push(p);screenPoints.push(p)}
+  if(showPaths&&D.seriesMeta[c].paths!==false){
+   const ringMap=new Map();for(const p of points){const ring=ringMap.get(p.row.elevation)||new Map();ring.set(p.row.heading,p);ringMap.set(p.row.elevation,ring)}
+   const add=(a,b,dashed)=>screenSegments.push({a,b,fill:VehicleViewControls.pathColor(b.fill),width:1,dashed});
+   for(const ring of [...ringMap.values()].map(r=>[...r.values()].sort((a,b)=>a.row.heading-b.row.heading))){
+    for(let i=1;i<ring.length;i++)add(ring[i-1],ring[i],ring[i].row.heading-ring[i-1].row.heading>(D.seriesMeta[c].step??5));
+    if(ring.length>1)add(ring.at(-1),ring[0],true);
+   }
+  }
+  counts[c]=points.length;plottedElevations[c]=[...new Set(rows.map(r=>r.elevation))];
+ }
+ const renderBackend=scatterRenderer.draw(ctx,screenPoints,mode,plotWidth,plotHeight,screenSegments);
+ window.orbitPlotState={series:categories.filter(c=>visibleSeries.has(c)),counts,elevations:plottedElevations,rows:screenPoints.length,rowIds:screenPoints.map(p=>p.row.embedding_row),allElevations,allHeadings,elevationMode,headingMode,selectedHeadings:[...selectedHeadings],selectedElevations:[...selectedElevations],showPaths,colorBy,palette};
+ $('visible-count').textContent=`· ${visibleSeries.size} selected · ${screenPoints.length.toLocaleString()} views`;
+ for(const [c,entry] of seriesCheckboxes){entry.count.textContent=VehicleAdditions.count(c,counts[c]||0,D);entry.label.dataset.inspected=String(c===color)}
+ $('color-key').textContent=colorBy==='viewpoint'?'Dots and the view map share the same colors. Open “Place colors on the view map” to move their anchors.':'Dots show vehicle paint; the map shows viewpoint colors.';
+ drawMarker();window.renderAudit={ms:performance.now()-renderStarted,rows:screenPoints.length,segments:screenSegments.length,renderer:renderBackend,cameraConvention:'right-handed look-at',depthSorted:mode!=='3d'||screenPoints.every((p,i)=>i===0||screenPoints[i-1].depth<=p.depth),pointRadius};
+}
+
+function scheduleStatic(){if(!staticFrame)staticFrame=requestAnimationFrame(staticPlot)}
+function drawMarker(){
+ marker.clearRect(0,0,plotWidth,plotHeight);window.orbitPoint=null;window.cameraOrbitPoint=null;if(!plotWidth)return;
+ if(selected&&visibleSeries.has(selected.category)&&comparisonPoints(selected.category).includes(selected)){
+  window.orbitPoint=VehicleViewControls.selection(marker,screenPoints,selected,screenSegments);
+ }
+ const selectionStatus=$('selection-depth-status');
+ if(selectionStatus)selectionStatus.textContent=window.orbitPoint?.occluded?(mode==='3d'?'Selected view is behind another point or path. Rotate or zoom to reveal it.':'Selected view overlaps another dot. Zoom in or switch to 3D to separate them.'):window.orbitPoint?'White outline: selected view. Points, paths and grid share the same 3D depth.':'Selected view is outside the displayed filters.';
+ if(mode==='3d')VehicleViewControls.orientation(marker,plotWidth,plotHeight,yaw,pitch,axisCaption);
+ if(!selectedCameraSample)return;const native=byScanRow.get(selectedCameraSample.selected_embedding_row);
+ if(!native||!visibleSeries.has(native.category)||!comparisonPoints(native.category).includes(native))return;
+ const q=project(selectedCameraSample.coords),r=project(native.coords);marker.beginPath();marker.moveTo(r.x,r.y);marker.lineTo(q.x,q.y);marker.strokeStyle='#4ef0cb80';marker.lineWidth=1;marker.stroke();marker.beginPath();marker.arc(r.x,r.y,4,0,Math.PI*2);marker.strokeStyle='#4ef0cb';marker.stroke();marker.beginPath();marker.moveTo(q.x,q.y-7);marker.lineTo(q.x+7,q.y);marker.lineTo(q.x,q.y+7);marker.lineTo(q.x-7,q.y);marker.closePath();marker.fillStyle='#4ef0cb';marker.fill();marker.strokeStyle='#fff';marker.lineWidth=1.5;marker.stroke();marker.fillStyle='#b8ffeb';marker.fillText(selectedCameraSample.observer+' crop',q.x,q.y+22);window.cameraOrbitPoint={x:q.x,y:q.y,sourceRow:selectedCameraSample.selected_embedding_row,cameraRow:selectedCameraSample.embedding_row,coords:selectedCameraSample.coords};
+}
+function resize(){const rect=plot.getBoundingClientRect(),dpr=devicePixelRatio||1;plotWidth=rect.width;plotHeight=rect.height;for(const [canvas,context] of [[base,ctx],[overlay,marker]]){canvas.width=Math.round(plotWidth*dpr);canvas.height=Math.round(plotHeight*dpr);context.setTransform(dpr,0,0,dpr,0,0)}staticPlot()}
+function showRow(row,image){document.querySelector('.image-tag').textContent=row.dataset==='sim2_sam31'?(embeddingKey==='gemma2'?`SIM2 / SAM 3.1 / GEMMA 2 ${D.featureDimensions}D`:'SIM2 / SAM 3.1 / CLIP B/16'):row.dataset==='sim2'?(embeddingKey==='gemma2'?`SIM2 CROP / GEMMA 2 ${D.featureDimensions}D`:'SIM2 REFERENCE / UNCHANGED CROP'):embeddingKey==='gemma2'?`SAM 3.1 CUTOUT / GEMMA 2 ${D.featureDimensions}D`:'SAM 3.1 CUTOUT / LETTERBOXED FEATURE';if(row.category!==color||!visibleSeries.has(row.category))return;activeSheet=row.preview_sheet;selected=row;const cell=row.preview_cell;preview.clearRect(0,0,256,176);preview.drawImage(image,(cell%8)*256,Math.floor(cell/8)*176,256,176,0,0,256,176);$('jeep-preview').dataset.row=row.embedding_row;$('jeep-preview').setAttribute('aria-label',`${row.category}, relative heading ${VehicleAdditions.angle(row.heading)} degrees, elevation ${row.elevation??'unknown'}`);
+ updateViewPad();const mismatch=circular(row.heading,angle);$('selected-view').textContent=`${row.category} · ${VehicleAdditions.angle(row.heading)}° / ${VehicleAdditions.angle(row.elevation)}°`;updateMismatch(row);$('image-name').textContent=row.image_path.split('/').at(-1);$('row-info').textContent=`Source cache row ${row.source_embedding_row} · ${D.featureDimensions||512} values`;row.coords.forEach((v,i)=>coordinateValues[i].textContent=v.toFixed(4));const ref=byRow.get(D.references[row.category]);$('reference-label').textContent=`Cosine to reference (${ref.heading}° / ${ref.elevation??'?'}°)`;$('similarity').textContent=row.cos_to_front.toFixed(4);$('view-note').textContent=row.uncertainty?`Source angle has ±${row.uncertainty}° label uncertainty.`:(row.dataset.startsWith('sim2')?'Sim2: verified heading, uncalibrated elevation.':'Scans: inferred heading convention; nearest recorded view. No interpolation.');$('original').hidden=false;$('original').style.display='inline-block';$('original').href=row.cutout_url|| (row.dataset==='sim2'?D.imageBase+row.image_path:D.maskImageBase+row.rgba_path);$('original').textContent=row.dataset==='sim2'?'Open original Sim2 PNG ↗':'Open SAM RGBA cutout ↗';$('status').textContent='';VehicleAdditions.show(row,D);drawMarker();state();evict();prefetch();}
+async function requestDisplay(row){if(!row||!visibleSeries.has(row.category)){pendingRow=null;clearPreview();return}pendingRow=row;if(displayBusy)return;displayBusy=true;try{while(pendingRow){const current=pendingRow;pendingRow=null;if(selected?.embedding_row===current.embedding_row){updateMismatch(current);updateViewPad();state();prefetch();continue}$('status').textContent=sheets.has(current.preview_sheet)?'':'Loading preview…';const image=await loadSheet(current.preview_sheet);if(pendingRow&&pendingRow.embedding_row!==current.embedding_row)continue;if(current.category!==color||!visibleSeries.has(current.category)||!comparisonPoints(current.category).includes(current))continue;showRow(current,image)}}catch(error){stop();$('status').textContent='Preview could not load. Move the heading to retry.';console.error(error)}finally{displayBusy=false}}
+function setHeading(value,{fromPlay=false,row=null}={}){angle=Math.round(Math.max(0,Math.min(360,value)));$('heading').value=angle;$('heading-text').textContent=uncalibrated(color)?`${angle}° / ?°`:`${angle}° / ${Math.round(requestedElevation)}°`;updateViewPad();state();requestDisplay(row||comparisonView(color,angle));if(headingMode==='current')scheduleStatic();syncSliceControls();if(!fromPlay){continuous=angle;syncUrl()}}
+// Scrub native recorded views with the cutout itself. A full panel width is
+// one revolution; the existing selector binds its pixels and vector together.
+const cutoutPanel=document.querySelector('.image-wrap'),cutoutCanvas=$('jeep-preview');
+let cutoutDrag=null,cutoutFrame=0,cutoutRequest=null;
+function flushCutout(){cutoutFrame=0;if(cutoutRequest===null)return;const heading=cutoutRequest;cutoutRequest=null;setHeading(heading)}
+function requestCutout(e){if(!cutoutDrag||e.pointerId!==cutoutDrag.id)return;const value=cutoutDrag.heading+(e.clientX-cutoutDrag.x)*360/cutoutDrag.width;cutoutRequest=((value%360)+360)%360;if(!cutoutFrame)cutoutFrame=requestAnimationFrame(flushCutout)}
+function endCutout(){if(cutoutFrame)cancelAnimationFrame(cutoutFrame);flushCutout();cutoutDrag=null;cutoutPanel.classList.remove('scrubbing')}
+cutoutPanel.addEventListener('pointerdown',e=>{if(e.button!==0||!e.isPrimary||!selected)return;stop();cutoutDrag={id:e.pointerId,x:e.clientX,heading:angle,width:Math.max(1,cutoutPanel.getBoundingClientRect().width)};cutoutPanel.setPointerCapture(e.pointerId);cutoutPanel.classList.add('scrubbing');cutoutCanvas.focus({preventScroll:true});e.preventDefault()});
+cutoutPanel.addEventListener('pointermove',requestCutout);
+cutoutPanel.addEventListener('pointerup',e=>{if(e.pointerId!==cutoutDrag?.id)return;requestCutout(e);endCutout()});
+cutoutPanel.addEventListener('pointercancel',e=>{if(e.pointerId===cutoutDrag?.id)endCutout()});
+cutoutPanel.addEventListener('lostpointercapture',e=>{if(e.pointerId===cutoutDrag?.id)endCutout()});
+cutoutCanvas.addEventListener('keydown',e=>{if(!selected||!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();stop();const step=e.shiftKey?15:1;setHeading(e.key==='Home'?0:e.key==='End'?360:((angle+(e.key==='ArrowRight'?step:-step))%360+360)%360)});
+function variance(){const fit=D.pcaFits?.[pcaKey];if(fit?.method==='PLS'){$('variance').textContent='Supervised latent coordinates · no PCA variance percentage';return;}const ax=mode==='3d'?[0,1,2]:[+mode[0],+mode[1]];$('variance').textContent=`${(ax.reduce((s,i)=>s+D.ratio[i],0)*100).toFixed(1)}% of ${D.varianceLabel||'fit-cohort variation'}`;}
+function stop(){playing=false;lastFrame=0;$('play').textContent='▶ Play';$('play').setAttribute('aria-pressed','false');state();syncUrl()}
+function animate(now){if(!playing)return;if(lastFrame)continuous+=(now-lastFrame)/1000*Number($('speed').value);lastFrame=now;if(continuous>360)continuous%=360;if(now-lastUpdate>=1000/30){lastUpdate=now;const next=Math.round(continuous);if(next!==angle)setHeading(next,{fromPlay:true})}requestAnimationFrame(animate)}
+function clearPreview(){
+ VehicleAdditions.clear();
+ selected=null;activeSheet=null;preview.clearRect(0,0,256,176);delete $('jeep-preview').dataset.row;
+ $('jeep-preview').setAttribute('aria-label',visibleSeries.size?'Loading selected vehicle crop':'No vehicle selected');
+ $('selected-view').textContent=visibleSeries.size?'Loading '+color+'…':'No vehicles on graph';
+ for(const id of ['mismatch','image-name','row-info','similarity','status'])$(id).textContent='';
+ for(const entry of coordinateValues)entry.textContent='—';$('original').hidden=true;$('original').style.display='none';if(visibleSeries.size&&!comparisonPoints(color).length){$('selected-view').textContent='No views match this comparison';$('view-note').textContent='Choose headings or elevations, or use All.';}
+ $('view-note').textContent=visibleSeries.size?(!comparisonPoints(color).length?'Choose headings or elevations, or use All.':''):'Choose a vehicle under Vehicles on graph.';
+ $('original').hidden=true;$('original').style.display='none';$('view-recorded').style.display='none';
+ $('play').disabled=!visibleSeries.size;drawMarker();state();
+}
+function pickColor(next,{addToPlot=true}={}){color=next;if(selected?.category!==color)clearPreview();if(addToPlot){visibleSeries.add(color);syncSeriesCheckboxes()}$('play').disabled=!visibleSeries.size;document.documentElement.style.setProperty('--accent',D.colors[color]);$('series').value=color;$('elevation').disabled=uncalibrated(color);$('elevation').value=uncalibrated(color)?'unknown':String(elevation);drawViewSamples();setHeading(angle);scheduleStatic()}
+function closest(x,y){return scatterRenderer.pick(x,y)}
+let pointer=null;
+overlay.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false,pan:e.shiftKey||e.button===1||e.button===2||mode!=='3d'};overlay.setPointerCapture(e.pointerId)});
+overlay.addEventListener('pointermove',e=>{const rect=overlay.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;if(pointer){const dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;if(Math.abs(e.clientX-pointer.startX)+Math.abs(e.clientY-pointer.startY)>2)pointer.moved=true;pointer.x=e.clientX;pointer.y=e.clientY;if(pointer.pan){panX+=dx/plotWidth;panY+=dy/plotHeight;scheduleStatic()}else if(mode==='3d'){yaw+=dx*.008;pitch=Math.max(-1.3,Math.min(1.3,pitch+dy*.008));scheduleStatic()}tooltip.style.display='none';return}const row=closest(x,y);tooltip.style.display=row?'block':'none';if(row){tooltip.textContent=`${VehicleAdditions.label(row.category,D)} · ${VehicleAdditions.angle(row.heading)}° / ${VehicleAdditions.angle(row.elevation)}°`;tooltip.style.left=Math.min(x+12,plotWidth-110)+'px';tooltip.style.top=y+12+'px'}});
+overlay.addEventListener('pointerup',e=>{const moved=pointer?.moved;pointer=null;if(moved){state();syncUrl();return;}const rect=overlay.getBoundingClientRect(),row=closest(e.clientX-rect.left,e.clientY-rect.top);if(row){stop();if(row.category!==color)pickColor(row.category);if(row.elevation!==null)setElevation(row.elevation);setHeading(row.heading,{row})}});
+overlay.addEventListener('pointercancel',()=>pointer=null);overlay.addEventListener('pointerleave',()=>tooltip.style.display='none');
+overlay.addEventListener('contextmenu',e=>e.preventDefault());
+overlay.addEventListener('wheel',e=>{e.preventDefault();const rect=overlay.getBoundingClientRect();zoomAt(Math.exp(-Math.max(-240,Math.min(240,e.deltaY))*.002),e.clientX-rect.left,e.clientY-rect.top)},{passive:false});
+
+// The view pad selects recorded pixels/vectors, never interpolated embeddings.
+const viewPad=$('view-pad'),svgNS='http://www.w3.org/2000/svg';
+const padBounds={left:42,right:442,top:14,bottom:120},gradientImages=new Map();
+const anchorUI=VehicleViewControls.mountAnchors({pad:viewPad,names:anchorNames,state:anchorPositions,colors:()=>viewAnchors,onChange:()=>applyPalette()});
+function viewGradient(unknown){const key=palette+'/'+unknown;if(gradientImages.has(key))return gradientImages.get(key);const canvas=document.createElement('canvas');canvas.width=361;canvas.height=96;const brush=canvas.getContext('2d');for(let y=0;y<96;y++)for(let x=0;x<361;x++){brush.fillStyle=unknown&&(y<42||y>54)?'#172232':viewpointColor(x,unknown?null:D.elevations.at(-1)-y*(D.elevations.at(-1)-D.elevations[0])/95);brush.fillRect(x,y,1,1)}const image=canvas.toDataURL('image/png');gradientImages.set(key,image);return image}
+const padX=value=>padBounds.left+(padBounds.right-padBounds.left)*value/360;
+const padY=value=>padBounds.bottom-(padBounds.bottom-padBounds.top)*(value-D.elevations[0])/(D.elevations.at(-1)-D.elevations[0]);
+function svgNode(name,attrs,text){const node=document.createElementNS(svgNS,name);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);if(text!==undefined)node.textContent=text;return node}
+function drawViewGrid(){const grid=$('view-grid');for(const h of [0,90,180,270,360]){const x=padX(h);grid.append(svgNode('line',{x1:x,y1:padBounds.top,x2:x,y2:padBounds.bottom,class:'grid'}),svgNode('text',{x,y:138,'text-anchor':h===360?'end':'middle'},h+'°'))}for(const e of D.elevations){const y=padY(e);grid.append(svgNode('line',{x1:padBounds.left,y1:y,x2:padBounds.right,y2:y,class:'grid'}),svgNode('text',{x:34,y:y+3,'text-anchor':'end'},e+'°'))}}
+function drawViewSamples(){const unknown=uncalibrated(color);$('view-color-anchors').dataset.unknown=String(unknown);$('view-gradient').setAttribute('href',viewGradient(unknown));const dots=$('view-samples');dots.replaceChildren();for(const row of fullGroups[color])dots.append(svgNode('circle',{cx:padX(row.heading),cy:row.elevation===null?67:padY(row.elevation),r:2,fill:viewpointColors.get(row.embedding_row),'data-row':row.embedding_row}))}
+function updateViewPad(){if(!color)return;const unknown=uncalibrated(color);$('view-request').setAttribute('transform',`translate(${padX(angle)} ${unknown?67:padY(requestedElevation)})`);const row=selected;if(row){$('view-recorded').style.fill=viewpointColors.get(row.embedding_row);$('view-recorded').setAttribute('cx',padX(row.heading));$('view-recorded').setAttribute('cy',row.elevation===null?67:padY(row.elevation));$('view-recorded').style.display=row.category===color?'':'none'}viewPad.setAttribute('aria-label',`Requested camera view: angle ${angle} degrees, elevation ${unknown?'uncalibrated':Math.round(requestedElevation)+' degrees'}`);$('view-pad-help').textContent=anchorUI.editing?'Drag A–D to position colors. The inspected camera view stays fixed.':unknown?'Drag left/right for angle. Elevation is uncalibrated in Sim2; colors encode angle only. Arrow keys adjust angle.':'Drag left/right for angle and up/down for elevation. Crosshair: requested · outlined dot: recorded view. Arrow keys adjust the view; Shift uses larger steps.'}
+function updateMismatch(row){const dh=circular(row.heading,angle),de=row.elevation===null?null:Math.abs(row.elevation-requestedElevation);$('mismatch').textContent=dh===0&&(de===0||de===null)?'Exact view':`Δ angle ${dh}°${de===null?'':` · elev ${de.toFixed(1)}°`}`}
+function setElevation(value){if(uncalibrated(color))return;requestedElevation=Math.max(D.elevations[0],Math.min(D.elevations.at(-1),value));const next=nearestElevation(requestedElevation);if(next!==elevation){elevation=next;rebuildViews();scheduleStatic()}$('elevation').value=String(elevation)}
+let viewPointer=null,padFrame=0,padRequest=null;
+function flushPad(){padFrame=0;if(!padRequest)return;const {heading,elevation:next}=padRequest;padRequest=null;setElevation(next);setHeading(heading)}
+function requestPad(e){const rect=viewPad.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width*460,y=(e.clientY-rect.top)/rect.height*154;padRequest={heading:Math.max(0,Math.min(360,(x-padBounds.left)/(padBounds.right-padBounds.left)*360)),elevation:D.elevations[0]+(padBounds.bottom-y)/(padBounds.bottom-padBounds.top)*(D.elevations.at(-1)-D.elevations[0])};if(!padFrame)padFrame=requestAnimationFrame(flushPad)}
+viewPad.addEventListener('pointerdown',e=>{if(anchorUI.editing||e.button!==0)return;stop();viewPointer=e.pointerId;viewPad.setPointerCapture(e.pointerId);viewPad.focus({preventScroll:true});requestPad(e)});
+viewPad.addEventListener('pointermove',e=>{if(e.pointerId===viewPointer)requestPad(e)});
+viewPad.addEventListener('pointerup',e=>{if(e.pointerId!==viewPointer)return;requestPad(e);if(padFrame)cancelAnimationFrame(padFrame);flushPad();viewPointer=null});
+viewPad.addEventListener('pointercancel',()=>{viewPointer=null;padRequest=null;if(padFrame)cancelAnimationFrame(padFrame);padFrame=0});
+viewPad.addEventListener('keydown',e=>{if(anchorUI.editing)return;if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();stop();const step=e.shiftKey?15:1;if(e.key==='ArrowUp'||e.key==='ArrowDown')setElevation(requestedElevation+(e.key==='ArrowUp'?step:-step));setHeading(e.key==='Home'?0:e.key==='End'?360:angle+(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0))});
+drawViewGrid();
+function syncPaletteKey(){for(const name of anchorNames){const item=document.querySelector(`[data-view-anchor=${name}]`);item.value=rgbHex(viewAnchors[name]);item.title=item.value}}
+function applyPalette(){
+ // A viewpoint-palette selection applies its colors to the graph immediately.
+ colorBy='viewpoint';$('point-color').value=colorBy;
+ viewHsv=anchorPositions.custom?VehicleViewControls.prepareHsv(viewAnchors,anchorPositions,toHsv,anchorNames):prepareViewHsv(viewAnchors);
+ viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
+ gradientImages.clear();syncPaletteKey();anchorUI.sync();drawViewSamples();updateViewPad();scheduleStatic();state();syncUrl();
+}
+for(const [name,entry] of Object.entries(viewPalettes))$('view-palette').add(new Option(entry.label,name));$('view-palette').value=palette;
+$('view-palette').onchange=()=>{palette=$('view-palette').value;viewAnchors=viewPalettes[palette].anchors;applyPalette()};
+let paletteFrame=0;
+function editAnchorColor(e){
+ const name=e.currentTarget.dataset.viewAnchor;
+ if(!validHex(e.currentTarget.value))return;
+ if(palette==='custom'&&rgbHex(customAnchors[name])===e.currentTarget.value.toLowerCase())return;
+ if(palette!=='custom')for(const key of anchorNames)customAnchors[key]=[...viewAnchors[key]];
+ customAnchors[name]=hexRgb(e.currentTarget.value);palette='custom';viewAnchors=customAnchors;$('view-palette').value=palette;
+ try{localStorage.setItem('vehicle-view-hsv-colors',JSON.stringify(Object.fromEntries(anchorNames.map(key=>[key,rgbHex(viewAnchors[key])]))))}catch{}
+ if(!paletteFrame)paletteFrame=requestAnimationFrame(()=>{paletteFrame=0;applyPalette()});
+}
+for(const name of anchorNames){const input=document.querySelector(`[data-view-anchor=${name}]`);input.addEventListener('input',editAnchorColor);input.addEventListener('change',editAnchorColor)}
+syncPaletteKey();
+
+function syncSeriesCheckboxes(){
+ for(const [category,entry] of seriesCheckboxes)entry.input.checked=visibleSeries.has(category);
+ for(const group of selectionGroups.values()){
+  const checked=group.members.filter(c=>visibleSeries.has(c)).length;
+  group.input.checked=checked===group.members.length;group.input.indeterminate=checked>0&&checked<group.members.length;
+  group.count.textContent=`${checked} / ${group.members.length}`;
+ }
+ const focus=$('paint-focus');if(focus){const paints=new Set([...visibleSeries].map(paintOf)),families=new Set([...visibleSeries].map(selectionGroup));
+  focus.value=paints.size===1?[...paints][0]:categories.filter(c=>families.has(selectionGroup(c))).every(c=>visibleSeries.has(c))&&visibleSeries.size?'all':'custom';}
+}
+function setVisible(next,{previewSeries=null}={}){
+ stop();visibleSeries.clear();for(const c of next)visibleSeries.add(c);syncSeriesCheckboxes();
+ if(!visibleSeries.size){pendingRow=null;clearPreview()}
+ else pickColor(visibleSeries.has(previewSeries)?previewSeries:visibleSeries.has(color)?color:[...visibleSeries].at(-1),{addToPlot:false});
+ scheduleStatic();state();syncUrl();
+}
+const displayCategories=[...categories].sort((a,b)=>{const rank=c=>D.seriesMeta[c].dataset==='sim2_sam31'?4:c.startsWith('Scans · jeep/')?0:c.startsWith('Scans · truck/')?1:c.startsWith('Scans · ')?2:3;return rank(a)-rank(b)||a.localeCompare(b)});
+function selectionGroup(category){
+ if(D.seriesMeta[category].group)return D.seriesMeta[category].group;
+ if(D.seriesMeta[category].dataset==='sim2')return 'Sim2 references';
+ const family=category.replace('Scans · ','').split('/')[0];return family[0].toUpperCase()+family.slice(1);
+}
+const groupNames=[...new Set(displayCategories.map(selectionGroup))];
+const seriesOptions=new Map();$('legend').classList.add('legend-groups');
+for(const name of groupNames){
+ const members=displayCategories.filter(c=>selectionGroup(c)===name);
+ const group=document.createElement('section'),head=document.createElement('div'),master=document.createElement('label'),input=document.createElement('input'),title=document.createElement('strong'),count=document.createElement('span'),only=document.createElement('button'),paints=document.createElement('div'),options=document.createElement('optgroup');
+ group.className='legend-group';group.setAttribute('aria-label',name+' colors');head.className='legend-group-head';
+ input.type='checkbox';input.setAttribute('aria-label','Show all '+name+' colors');title.textContent=name;count.className='group-count';
+ only.textContent='Only';only.type='button';only.setAttribute('aria-label','Only '+name+' on graph');paints.className='legend-paints';
+ master.append(input,title,count);head.append(master,only);group.append(head,paints);$('legend').append(group);
+ options.label=name;$('series').append(options);seriesOptions.set(name,options);
+ selectionGroups.set(name,{members,input,count,paints});
+ input.onchange=()=>{const next=new Set(visibleSeries);for(const c of members)input.checked?next.add(c):next.delete(c);setVisible(next,{previewSeries:input.checked?(members.includes(color)?color:members[0]):null})};
+ only.onclick=()=>setVisible(members,{previewSeries:members.includes(color)?color:members[0]});
+}
+for(const category of displayCategories){
+ const name=selectionGroup(category),paint=category.split('/').at(-1).trim(),shortName=D.seriesMeta[category].displayLabel||paint[0].toUpperCase()+paint.slice(1);
+ seriesOptions.get(name).append(new Option(shortName,category));const label=document.createElement('label'),input=document.createElement('input'),dot=document.createElement('span'),count=document.createElement('span');
+ input.type='checkbox';input.setAttribute('aria-label','Show '+category);input.checked=visibleSeries.has(category);dot.className='dot';dot.style.background=D.colors[category];count.className='sample-count';count.title='Shown on graph / available views. Unchecked vehicles show zero.';count.textContent=VehicleAdditions.count(category,fullGroups[category].length,D);
+ label.title=category;label.append(input,dot,VehicleAdditions.nameNode(shortName),count);selectionGroups.get(name).paints.append(label);seriesCheckboxes.set(category,{input,label,count});
+ input.onchange=()=>{const next=new Set(visibleSeries);if(input.checked)next.add(category);else next.delete(category);setVisible(next,{previewSeries:input.checked?category:null})};
+}
+const paintFocus=$('paint-focus');
+if(paintFocus){
+ for(const paint of [...new Set(categories.map(paintOf))].sort())paintFocus.add(new Option('Only '+paint[0].toUpperCase()+paint.slice(1),paint));
+ paintFocus.onchange=()=>{if(paintFocus.value==='custom')return;const families=new Set([...visibleSeries].map(selectionGroup));if(!families.size)for(const name of groupNames)families.add(name);setVisible(categories.filter(c=>families.has(selectionGroup(c))&&(paintFocus.value==='all'||paintOf(c)===paintFocus.value)))};
+}
+syncSeriesCheckboxes();
+const comparison=document.querySelector('.comparison');
+try{const saved=localStorage.getItem('vehicle-graph-selection-open');if(saved!==null)comparison.open=saved==='true'}catch{}
+comparison.addEventListener('toggle',()=>{try{localStorage.setItem('vehicle-graph-selection-open',String(comparison.open))}catch{}});
+$('only-series').onclick=()=>setVisible([color]);$('all-series').onclick=()=>setVisible(categories);$('clear-series').onclick=()=>setVisible([]);
+const headingInputs=new Map(),elevationInputs=new Map();
+function activeHeadingChoices(){if(headingMode==='all')return new Set(headingChoices);if(headingMode==='selected')return new Set(selectedHeadings);return new Set([headingChoices.reduce((best,v)=>circular(v,angle)<circular(best,angle)?v:best,headingChoices[0])])}
+function activeElevationChoices(){return elevationMode==='all'?new Set(elevationChoices):elevationMode==='selected'?new Set(selectedElevations):new Set([String(elevation),...(elevationChoices.includes('unknown')?['unknown']:[])])}
+function syncSliceControls(){
+ $('all-elevations').checked=allElevations;$('all-headings').checked=allHeadings;
+ $('heading-mode').value=headingMode;$('elevation-mode').value=elevationMode;
+ for(const [value,input] of headingInputs)input.checked=activeHeadingChoices().has(value);
+ for(const [value,input] of elevationInputs)input.checked=activeElevationChoices().has(value);
+ $('slice-summary').textContent=`${headingMode==='all'?'All recorded headings':headingMode==='current'?'Heading follows '+angle+'°':selectedHeadings.size+' requested headings'} · ${elevationMode==='all'?'All elevations':elevationMode==='current'?'Elevation follows '+elevation+'°':selectedElevations.size+' selected elevations'}`;
+}
+function refreshSlices(){allElevations=elevationMode==='all';allHeadings=headingMode==='all';stop();sliceCache.clear();syncSliceControls();setHeading(angle);scheduleStatic();syncUrl()}
+$('all-elevations').onchange=()=>{elevationMode=$('all-elevations').checked?'all':'current';refreshSlices()};
+$('all-headings').onchange=()=>{headingMode=$('all-headings').checked?'all':'current';refreshSlices()};
+$('heading-mode').onchange=()=>{headingMode=$('heading-mode').value;refreshSlices()};
+$('elevation-mode').onchange=()=>{elevationMode=$('elevation-mode').value;refreshSlices()};
+for(const value of headingChoices){
+ const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('aria-label','Compare heading '+value+' degrees');label.append(input,document.createTextNode(value+'°'));$('heading-choices').append(label);headingInputs.set(value,input);
+ input.onchange=()=>{const next=activeHeadingChoices();input.checked?next.add(value):next.delete(value);headingMode='selected';selectedHeadings.clear();for(const v of next)selectedHeadings.add(v);refreshSlices()};
+}
+for(const value of elevationChoices){
+ const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('aria-label','Compare elevation '+value);label.append(input,document.createTextNode(value==='unknown'?'Uncalibrated · Sim2':value+'°'));$('elevation-choices').append(label);elevationInputs.set(value,input);
+ input.onchange=()=>{const next=activeElevationChoices();input.checked?next.add(value):next.delete(value);elevationMode='selected';selectedElevations.clear();for(const v of next)selectedElevations.add(v);refreshSlices()};
+}
+$('heading-none').onclick=()=>{headingMode='selected';selectedHeadings.clear();refreshSlices()};
+$('heading-front-rear').onclick=()=>{headingMode='selected';selectedHeadings.clear();selectedHeadings.add(0);selectedHeadings.add(180);refreshSlices()};
+$('elevation-none').onclick=()=>{elevationMode='selected';selectedElevations.clear();refreshSlices()};
+syncSliceControls();
+$('point-color').value=colorBy;$('point-color').onchange=()=>{colorBy=$('point-color').value;scheduleStatic();state();syncUrl()};
+$('paths').checked=showPaths;$('paths').onchange=()=>{showPaths=$('paths').checked;scheduleStatic();state();syncUrl()};
+for(const value of D.elevations)$('elevation').add(new Option(value+'°',String(value)));const unknownElevation=new Option('Uncalibrated · Sim2','unknown');unknownElevation.disabled=true;$('elevation').add(unknownElevation);$('elevation').value=elevation;$('series').onchange=e=>{stop();pickColor(e.target.value)};$('elevation').onchange=e=>{stop();setElevation(Number(e.target.value));setHeading(angle)};
+$('heading').oninput=e=>{if(playing)stop();setHeading(Number(e.target.value))};for(const button of document.querySelectorAll('[data-angle]'))button.onclick=()=>{stop();setHeading(Number(button.dataset.angle))};
+$('play').onclick=()=>{if(playing){stop();return}playing=true;continuous=angle;lastFrame=0;lastUpdate=0;$('play').textContent='Ⅱ Pause';$('play').setAttribute('aria-pressed','true');state();prefetch();requestAnimationFrame(animate)};
+$('projection').value=mode;$('projection').onchange=()=>{stop();mode=$('projection').value;variance();state();staticPlot();syncUrl()};$('reset').onclick=resetCamera;
+if($('zoom-in'))$('zoom-in').onclick=()=>zoomAt(1.5);
+if($('zoom-out'))$('zoom-out').onclick=()=>zoomAt(1/1.5);
+if($('focus-point'))$('focus-point').onclick=focusSelected;
+ $('point-size').value=pointRadius;$('point-size').oninput=e=>{pointRadius=Number(e.target.value);scheduleStatic();state();syncUrl()};
+ $('fit-visible').onclick=()=>{
+  if(!screenPoints.length)return;zoom=1;panX=panY=0;
+  const projectPoint=VehicleViewControls.projector(ranges,mode,yaw,pitch,zoom,0,0,plotWidth,plotHeight);
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const p of screenPoints){const q=projectPoint(p.row.coords);minX=Math.min(minX,q.x);maxX=Math.max(maxX,q.x);minY=Math.min(minY,q.y);maxY=Math.max(maxY,q.y)}
+  panX=.5-(minX+maxX)/2/plotWidth;panY=.5-(minY+maxY)/2/plotHeight;
+  zoomAt(Math.min((plotWidth-80)/Math.max(20,maxX-minX),(plotHeight-80)/Math.max(20,maxY-minY)));
+ };
+
+syncZoom();
+const pcaSelector=$('pca-fit');
+function axisCaption(i){return D.pcaFits?.[pcaKey]?.method==='PLS'?`LV${i+1}`:`PC${i+1} · ${(D.ratio[i]*100).toFixed(1)}%`;}
+function pcaDescription(){
+ const fit=D.pcaFits?.[pcaKey];if(!fit)return;
+ const method=fit.method||'PCA',axis=method==='PLS'?'LV':'PC';
+ document.querySelector('.plot-head .title').textContent=`${D.modelLabel||(embeddingKey==='clip'?'CLIP B/16':'EmbeddingGemma 2')} · ${D.featureDimensions}D · ${fit.label}`;
+ document.querySelector('.intro').textContent='Compare current vehicle views with fresh PCA or supervised PLS. Choose vehicles below; display filters keep the selected axes fixed.';
+ $('pca-fit-info').textContent=method==='PLS'?`Fitted on ${fit.fitCount.toLocaleString()} nonpolar scan views. Supervised display: axes mix the selected targets; separation is not held-out accuracy or identity confidence.`:`Fitted on ${fit.fitCount.toLocaleString()} current ${D.featureDimensions}D views. Percentages show embedding variance retained by this PCA.`;
+ document.querySelector('footer span').textContent=`${D.rows.length.toLocaleString()} cached crops · ${Object.keys(D.colors).length} series · ${D.featureDimensions} → 3 ${method}`;
+ $('projection-data').href=fit.projectionUrl;
+ document.querySelectorAll('#coordinates .coordinate b').forEach((e,i)=>e.textContent=axis+(i+1));
+ const options=[`3D · ${axis}1 / ${axis}2 / ${axis}3`,`2D · ${axis}1 / ${axis}2`,`2D · ${axis}1 / ${axis}3`,`2D · ${axis}2 / ${axis}3`];
+ [...$('projection').options].forEach((o,i)=>o.textContent=options[i]);
+ $('projection').setAttribute('aria-label','Projection axes');$('plot').setAttribute('aria-label',method+' point cloud and heading paths');
+ const notes=document.querySelector('details.notes p');
+ notes.textContent=method==='PLS'?'PLS fits adopted type/color descriptions and/or relative viewing angles using 43,200 nonpolar scan embeddings. Each target block has equal centered variance. Query coordinates use only the image embedding. Sim2 and polar views are projected without inventing pose labels. These are exploratory display fits, not validation or calibrated confidence.':'PCA is fitted on the declared current cohort. EG2 offers normalized prefixes; DINOv3 uses its full normalized 768D CLS vector. The full catalog contains all 50,400 dense scans and 2,808 Sim2 original/masked views. The smaller native scans are omitted from this viewer and remain in the source archive. Display filters do not refit axes. Three displayed coordinates discard some embedding information.';
+}
+
+if(pcaSelector&&D.pcaFits){
+ $('pca-fit-control').hidden=false;
+ for(const [key,fit]of Object.entries(D.pcaFits))pcaSelector.add(new Option(fit.label+' · '+fit.fitCount.toLocaleString(),key));
+ pcaSelector.value=pcaKey;
+ pcaSelector.onchange=()=>{stop();pcaKey=pcaSelector.value;applyPcaCoordinates();ranges=D.plotRanges;pcaDescription();variance();if(selected)selected.coords.forEach((v,i)=>coordinateValues[i].textContent=v.toFixed(4));resetCamera();};
+ pcaDescription();
+}
+$('labels-link').href=D.labelsUrl;$('cache-link').href=D.cacheUrl;$('methods-link').href=D.methodsUrl;document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
+new ResizeObserver(resize).observe(plot);variance();pickColor(color,{addToPlot:false});resize();
+
+const replay=$('camera-sample');for(const [i,row] of D.cameraSamples.entries())replay.add(new Option(`${row.observer} · t=${row.scene_time_sec}s · ${row.resampling.output_size_px.join('×')} px`,String(i)));
+function showCameraSample(){const row=D.cameraSamples[Number(replay.value)];if(!row)return;$('camera-crop').src='camera/'+row.crop_path;$('camera-description').textContent=`Requested elevation ${row.request.elevation_deg.toFixed(1)}°, selected ${row.selected_elevation_deg}°; viewing-ray error ${row.viewing_ray_error_deg.toFixed(1)}°. Crop/native cosine ${row.cosine_to_native_view.toFixed(3)}. Actual pixel dimensions; enlarged preview uses nearest-neighbor display.`;window.cameraReplayState={observer:row.observer,time:row.scene_time_sec,crop:row.crop_path,size:row.resampling.output_size_px,error:row.viewing_ray_error_deg};selectedCameraSample=row;drawMarker();}replay.onchange=showCameraSample;showCameraSample();
+
+
+})().catch(error=>{document.getElementById('status').textContent='Dataset load failed: '+error.message;console.error(error)});
+</script></body></html>

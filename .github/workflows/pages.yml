@@ -1,0 +1,75 @@
+name: Verified solids explorer Pages
+
+'on':
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: solids-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.12.1'
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install pinned verification dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Test frontend and transport
+        run: node --test tests/diagnostics.test.js tests/transport*.test.js tests/pages*.test.js site/tests/*.test.js
+      - name: Test data packaging and secure restoration
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m pytest -p no:cacheprovider -W error tests/test_build_static_data.py tests/test_release_bundle.py tests/test_workflow.py -q
+      - name: Download and verify pinned real data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="$(python -c 'import json; print(json.load(open("release-data.json"))["tag"])')"
+          ASSET="$(python -c 'import json; print(json.load(open("release-data.json"))["asset"])')"
+          [[ "$TAG" =~ ^data-[A-Za-z0-9._-]+$ ]]
+          [[ "$ASSET" =~ ^[A-Za-z0-9._-]+\.tar\.gz$ ]]
+          mkdir "$RUNNER_TEMP/solids-data"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$ASSET" --dir "$RUNNER_TEMP/solids-data"
+          python tools/release_bundle.py restore --archive "$RUNNER_TEMP/solids-data/$ASSET" --manifest release-data.json --frontend site --out _site
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Upload verified site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy verified artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
