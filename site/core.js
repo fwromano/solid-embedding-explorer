@@ -48,6 +48,37 @@ export function pathRings(rows) {
   }
   return [...groups.values()].map(ring => ring.sort((a,b) => a.heading-b.heading || a.id-b.id));
 }
+export function viewPathLinks(rows,{heading=false,elevation=false}={}) {
+  const links=new Map();
+  function add(a,b,kind,dashed) {
+    const from=sourceRow(a).id,to=sourceRow(b).id;
+    if(from===to)return;
+    const key=`${kind}:${Math.min(from,to)}/${Math.max(from,to)}`,previous=links.get(key);
+    // Symmetry copies can repeat the same segment; a sampled step beats a gap.
+    if(!previous||(previous.dashed&&!dashed))links.set(key,{from,to,kind,dashed});
+  }
+  if(heading)for(const ring of pathRings(rows)) {
+    if(ring.length<2)continue;
+    for(let i=1;i<=ring.length;i++) {
+      const a=ring[i-1],b=ring[i%ring.length];
+      add(a,b,'heading',i===ring.length||b.heading-a.heading>1.01);
+    }
+  }
+  if(elevation) {
+    const tracks=new Map();
+    for(const row of rows) {
+      const key=`${seriesOf(row)}@${row.heading}`;
+      if(!tracks.has(key))tracks.set(key,[]);
+      tracks.get(key).push(row);
+    }
+    for(const track of tracks.values()) {
+      track.sort((a,b)=>a.elevation-b.elevation||a.id-b.id);
+      // Elevation is bounded, not circular: never join the top to the bottom.
+      for(let i=1;i<track.length;i++)add(track[i-1],track[i],'elevation',track[i].elevation-track[i-1].elevation>5.01);
+    }
+  }
+  return [...links.values()];
+}
 export function filterRows(catalog, state) {
   const active = new Set(state.series), elevations = new Set(state.elevations || []);
   let candidates = catalog.rows.filter(row => active.has(seriesOf(row)));
@@ -93,7 +124,7 @@ export function parseState(query, catalog, savedColors) {
     elevationMode:choice('elevationMode',['all','current','selected'],'all'),
     headings:numericList('atHeading',0,360),elevations:numericList('atElevation',-90,90).filter(n=>elevations.includes(n)),
     heading:number('heading',0,-36000,36000),elevation:number('elevation',20,Math.min(...elevations,0),Math.max(...elevations,0)),
-    paths:p.get('paths')==='1',pointSize:number('pointSize',2,1,5),
+    paths:p.get('paths')==='1',elevationPaths:p.get('elevationPaths')==='1',pointSize:number('pointSize',2,1,5),
     colorBy:choice('colorBy',['viewpoint','paint','shape'],'viewpoint'),palette:viewColors.palette,viewColors,
     paintFocus:choice('paintFocus',['all','custom',...colorIds],'all'),imageMode:choice('imageMode',['rgb','mask','cutout'],'rgb'),
     speed:number('speed',30,1,120),yaw:number('yaw',-.65,-100,100),pitch:number('pitch',.55,-1.5,1.5),zoom:number('zoom',1,.05,128),panX:number('panX',0,-1000,1000),panY:number('panY',0,-1000,1000)

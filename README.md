@@ -18,6 +18,8 @@ The heading filters, view map, playback and shared links retain each repeated vi
 
 The coverage panel separates measured embeddings, symmetry repeats, expected sampling coverage, and views matching the current filters for every shape. The plot reports source points with visible pixels, overlapping points, and points outside the frame. “Show all data” restores every shape/paint pair and all available headings/elevations, then fits the camera to those points. The view map keeps every available pose and dims those excluded by the plot filters. Complete coverage refers to the recorded angular grid; it does not imply polar-cap or camera-roll data.
 
+Heading paths and elevation paths can be enabled independently, or together as a grid of viewing directions. Heading paths connect 1° samples around each visible elevation; elevation paths connect the recorded 5° samples at a fixed heading. Both follow the active filters, mark skipped samples with dashed links, and collapse duplicate symmetry links. Elevation paths do not wrap from +60° to −60°. Both toggles are preserved in shared links.
+
 ## Static implementation
 
 The browser performs exact selected-prefix cosine neighbors, physical-reference comparisons, reference galleries and native-mask IoU. Vector work runs in a worker so plotting remains interactive. All four original float32 prefix arrays are transported losslessly. Display RGB files use verified pixel-identical lossless WebP; native masks retain their original PNG bytes. Symmetry views reference these exact artifacts; no new encoding is needed.

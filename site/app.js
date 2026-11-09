@@ -1,4 +1,4 @@
-import {describePose,projectionVariance,clamp,canonicalHeading,circularDistance,seriesOf,nearestSample,filterRows,pathRings,parseState,serializeState,projector,cameraBasis,createRaster,rasterize,pickPixel,packColor,unpackColor,validateCatalog,decodeProjection} from './core.js';
+import {describePose,projectionVariance,clamp,canonicalHeading,circularDistance,seriesOf,nearestSample,filterRows,viewPathLinks,parseState,serializeState,projector,cameraBasis,createRaster,rasterize,pickPixel,packColor,unpackColor,validateCatalog,decodeProjection} from './core.js';
 
 import {fetchStatic,assetURL,warmDiagnostics,onDiagnosticsProgress} from './transport.js';
 import {parseColorState,createColorMapping} from './view-colors.js';
@@ -57,7 +57,7 @@ export function createSelectionGate() {
 export function startExplorer() {
   const $=id=>document.getElementById(id),number=n=>Number(n).toLocaleString(),angle=n=>Number(n.toFixed(1));
   let catalog=null,sourceCatalog=null,state=null,coordinates=null,fit=null,byId=new Map(),indexById=new Map(),groups=new Map();
-  let visible=[],visibleIds=new Set(),rings=[],colors=new Map(),screen=[],raster=null,imageData=null;
+  let visible=[],visibleIds=new Set(),pathLinks=[],colors=new Map(),screen=[],raster=null,imageData=null;
   let plotted=[],visibleBySource=new Map(),screenBySource=new Map(),coverage=null,visibility=null;
   let pointColors=new Map(),pointPathColors=new Map();
   let projectionCache=new Map(),frame=0,markerFrame=0,urlTimer=0,refreshTimer=0,neighborTimer=0,playing=false,playFrame=0,lastPlay=0;
@@ -116,8 +116,9 @@ export function startExplorer() {
     try{const saved=savedColors()||{};saved.positions=next.positions;if(next.palette==='custom')saved.anchors=next.anchors;localStorage.setItem('solids-view-colors',JSON.stringify(saved));}catch{/* Storage may be disabled; URL state still works. */}
     changed({recolor:true});
   }
+  function cachePaths() {pathLinks=viewPathLinks(visible,{heading:state.paths,elevation:state.elevationPaths});}
   function updateVisible() {
-    visible=filterRows(catalog,state);visibleIds=new Set(visible.map(r=>r.id));rings=pathRings(visible);
+    visible=filterRows(catalog,state);visibleIds=new Set(visible.map(r=>r.id));cachePaths();
     plotted=plotRepresentatives(visible);visibleBySource=new Map();
     for(const row of visible){const id=sourceId(row);if(!visibleBySource.has(id))visibleBySource.set(id,[]);visibleBySource.get(id).push(row);}
     visibility=visibleCoverage(visible);
@@ -164,7 +165,7 @@ export function startExplorer() {
     if(![...$('speed').options].some(option=>Number(option.value)===state.speed))$('speed').add(new Option(state.speed+'° / sec',String(state.speed)));
     const controls={fit:'fit',dimensions:'dimensions',projection:'mode',palette:'palette','point-color':'colorBy','point-size':'pointSize','heading-mode':'headingMode','elevation-mode':'elevationMode',speed:'speed','image-mode':'imageMode',series:'seriesId','paint-focus':'paintFocus'};
     for(const [id,key] of Object.entries(controls))$(id).value=state[key];
-    $('paths').checked=state.paths;$('all-headings').checked=state.headingMode==='all';$('all-elevations').checked=state.elevationMode==='all';
+    $('paths').checked=state.paths;$('elevation-paths').checked=state.elevationPaths;$('all-headings').checked=state.headingMode==='all';$('all-elevations').checked=state.elevationMode==='all';
     const mapHeading=state.heading>=0&&state.heading<=360?state.heading:canonicalHeading(state.heading,360);
     $('heading').value=mapHeading;$('elevation').value=state.elevation;
     $('heading-value').textContent=angle(state.heading)+'°';$('elevation-value').textContent=angle(state.elevation)+'°';
@@ -192,23 +193,17 @@ export function startExplorer() {
     screen=plotted.map(row=>({...project(coords(row)),id:row.id,color:pointColors.get(sourceId(row))}));
     screenBySource=new Map(plotted.map((row,i)=>[sourceId(row),screen[i]]));
     const segments=[...annotations.segments];
-    const drawnLinks=new Set();
-    if(state.paths)for(const ring of rings) {
-      if(ring.length<2)continue;
-      for(let i=1;i<=ring.length;i++){
-        const a=ring[i-1],b=ring[i%ring.length];
-        const key=`${sourceId(a)}/${sourceId(b)}`;
-        if(sourceId(a)===sourceId(b)||drawnLinks.has(key))continue;
-        drawnLinks.add(key);
-        segments.push({a:screenBySource.get(sourceId(a)),b:screenBySource.get(sourceId(b)),color:pointPathColors.get(sourceId(b)),dashed:i===ring.length||b.heading-a.heading>1.01});
-      }
+    let headingSegments=0,elevationSegments=0;
+    for(const link of pathLinks) {
+      segments.push({a:screenBySource.get(link.from),b:screenBySource.get(link.to),color:pointPathColors.get(link.to),dashed:link.dashed});
+      if(link.kind==='heading')headingSegments++;else elevationSegments++;
     }
     rasterize(raster,screen,segments,state.pointSize);
     const coverageOnScreen=plotCoverage(screen,raster,state.pointSize);
     $('plot-screen-coverage').textContent=`${number(coverageOnScreen.painted)} source points have visible pixels · ${number(coverageOnScreen.occluded)} overlap or are occluded · ${number(coverageOnScreen.offscreen)} outside the frame`;
     pixelContext.putImageData(imageData,0,0);ctx.drawImage(offscreen,0,0,width,height);
     ctx.font='11px system-ui';ctx.fillStyle='#a4b3c9';for(const label of annotations.labels)ctx.fillText(label.text,label.x,label.y);
-    renderStats={frames:renderStats.frames+1,ms:performance.now()-started,...coverageOnScreen,views:visible.length,segments:segments.length-annotations.segments.length,gridSegments:annotations.segments.length,axisLabels:annotations.labels,renderer:'cached CPU pixel depth buffer',width,height,depthPicking:true};
+    renderStats={frames:renderStats.frames+1,ms:performance.now()-started,...coverageOnScreen,views:visible.length,segments:segments.length-annotations.segments.length,headingSegments,elevationSegments,gridSegments:annotations.segments.length,axisLabels:annotations.labels,renderer:'cached CPU pixel depth buffer',width,height,depthPicking:true};
     drawMarker();
   }
 
@@ -409,7 +404,7 @@ export function startExplorer() {
       $('fit-note').textContent=fit.note;
       $('projection-download').href=assetURL(fit.url);$('basis-download').href=assetURL(`/data/${build}/${fit.basis_file}`);updateInspector();if(selected())scheduleNeighbors();
       return true;
-    }catch(error){if(version===projectionVersion){coordinates=null;fit=null;$('variance').textContent='Projection unavailable';$('plot-screen-coverage').textContent='Projection unavailable; no points drawn.';renderStats={...renderStats,points:0,inFrame:0,offscreen:0,painted:0,occluded:0};screen=[];screenBySource.clear();rasterize(raster,[],[],state.pointSize);clearSelection();ctx.clearRect(0,0,width,height);marker.clearRect(0,0,width,height);fail(error,'Projection unavailable');}return false;}
+    }catch(error){if(version===projectionVersion){coordinates=null;fit=null;$('variance').textContent='Projection unavailable';$('plot-screen-coverage').textContent='Projection unavailable; no points drawn.';renderStats={...renderStats,points:0,inFrame:0,offscreen:0,painted:0,occluded:0,segments:0,headingSegments:0,elevationSegments:0};screen=[];screenBySource.clear();rasterize(raster,[],[],state.pointSize);clearSelection();ctx.clearRect(0,0,width,height);marker.clearRect(0,0,width,height);fail(error,'Projection unavailable');}return false;}
     finally{if(version===projectionVersion){busy=false;document.querySelector('.layout').inert=false;document.body.dataset.loading='false';syncControls();schedule();}}
   }
   async function loadBuild() {
@@ -434,7 +429,7 @@ export function startExplorer() {
       await loadProjection();if(epoch!==loadVersion)return;
       if(restoreId!==null&&visibleIds.has(restoreId))await selectRow(restoreId,{request:false});else await ensureSelection();
       syncControls();resize();await checkStatus();
-    }catch(error){if(epoch===loadVersion){busy=false;document.body.dataset.loading='false';coordinates=null;screen=[];screenBySource.clear();ctx.clearRect(0,0,width,height);marker.clearRect(0,0,width,height);$('plot-screen-coverage').textContent='Build unavailable; no points drawn.';renderStats={...renderStats,points:0,inFrame:0,offscreen:0,painted:0,occluded:0};$('coverage').textContent='Build could not be loaded. No substitute data is used.';fail(error);}}
+    }catch(error){if(epoch===loadVersion){busy=false;document.body.dataset.loading='false';coordinates=null;screen=[];screenBySource.clear();ctx.clearRect(0,0,width,height);marker.clearRect(0,0,width,height);$('plot-screen-coverage').textContent='Build unavailable; no points drawn.';renderStats={...renderStats,points:0,inFrame:0,offscreen:0,painted:0,occluded:0,segments:0,headingSegments:0,elevationSegments:0};$('coverage').textContent='Build could not be loaded. No substitute data is used.';fail(error);}}
   }
   function updateCoverage(status) {
     const expected=status.expected_count;$('coverage-progress').max=expected;$('coverage-progress').value=status.count||0;
@@ -496,7 +491,8 @@ export function startExplorer() {
     for(const id of ['fit','dimensions'])$(id).onchange=async()=>{stop();state[id]=id==='dimensions'?Number($(id).value):$(id).value;if(id==='fit')Object.assign(state,{yaw:-.65,pitch:.55,zoom:1,panX:0,panY:0});syncURL();await loadProjection();};
     for(const [id,key] of [['projection','mode'],['point-color','colorBy']])$(id).onchange=()=>{state[key]=$(id).value;changed({recolor:key!=='mode'});};
     $('palette').onchange=()=>{const next=parseColorState(new URLSearchParams({palette:$('palette').value}),{min:state.viewColors.elevationMin,max:state.viewColors.elevationMax},savedColors());next.positions=structuredClone(state.viewColors.positions);applyColors(next);};
-    $('point-size').oninput=()=>{state.pointSize=Number($('point-size').value);changed();};$('paths').onchange=()=>{state.paths=$('paths').checked;changed();};
+    $('point-size').oninput=()=>{state.pointSize=Number($('point-size').value);changed();};
+    for(const [id,key] of [['paths','paths'],['elevation-paths','elevationPaths']])$(id).onchange=()=>{state[key]=$(id).checked;cachePaths();changed();};
     for(const kind of ['heading','elevation']) {
       $(kind+'-mode').onchange=()=>{stop();state[kind+'Mode']=$(kind+'-mode').value;changed({filters:true});ensureSelection();};
       $('all-'+kind+'s').onchange=()=>{state[kind+'Mode']=$('all-'+kind+'s').checked?'all':'current';changed({filters:true});ensureSelection();};
