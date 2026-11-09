@@ -87,3 +87,5 @@
   .view-map .view-map-anchor-row label { flex-wrap: wrap; gap: 3px; }
   .view-map .view-map-caption { white-space: normal; }
 }
+
+.view-map-availability{font-size:12px;color:#b6c6d5;margin:6px 0;font-variant-numeric:tabular-nums}

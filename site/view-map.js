@@ -1,3 +1,4 @@
+import {sourceRow} from './symmetry.js';
 // Heading stays in the visual 0…360 domain. Only color interpolation is circular.
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
 
@@ -72,7 +73,7 @@ const MAP_RECT = {left:0,top:0,width:360,height:120};
 const rounded = value => Number(value.toFixed(1));
 const rgbCss = rgb => `rgb(${rgb.join(' ')})`;
 
-/** Mount once; update with current plain color state and only the selected series' actual rows. */
+/** Mount once; update with current plain color state and only the selected series' views (including symmetry aliases). */
 export function mountViewMap(root, {onRequest, onColors}) {
   const doc = root.ownerDocument;
   const html = (tag, className, text) => {
@@ -107,8 +108,9 @@ export function mountViewMap(root, {onRequest, onColors}) {
   const elevationAxis = html('div','view-map-elevation-axis');
   chart.append(pad,elevationAxis,headingAxis,html('div','view-map-axis-title','Heading → · Elevation ↑'));
   const readout = html('p','view-map-readout');
-  const help = html('p','view-map-help','Drag to request a view. Arrow keys move 1°; Shift moves 15°. Crosshair: request · ring: recorded sample. Dots are actual measured views.');
-  section.append(title,chart,readout,help);
+  const availability = html('p','view-map-availability');
+  const help = html('p','view-map-help','Drag to request a view. Arrow keys move 1°; Shift moves 15°. Crosshair: request · ring: selected view. Dim dots are hidden by the plot filters. Dots include symmetry repeats sharing a source embedding.');
+  section.append(title,chart,readout,availability,help);
   root.append(section);
   const gradient = createGradientCache();
   let current, destroyed = false, lastRaster, lastSamples, drag = null, editing = false;
@@ -267,7 +269,7 @@ export function mountViewMap(root, {onRequest, onColors}) {
       recorded.setAttribute('fill',rgbCss(current.rgbAt(row.heading,row.elevation)));
     }
     const poseLabel = pose => `${rounded(pose.heading)}° heading, ${rounded(pose.elevation)}° elevation`;
-    readout.textContent = `Requested ${poseLabel(current.requested)} · ${row ? `Recorded ${poseLabel(row)}` : 'No recorded sample'}`;
+    readout.textContent = `Requested ${poseLabel(current.requested)} · ${row ? row.symmetry_source ? `Symmetry view ${poseLabel(row)} · source ${poseLabel(sourceRow(row))}` : `Recorded ${poseLabel(row)}` : 'No recorded sample'}`;
     pad.setAttribute('aria-label',`${readout.textContent}. Arrow keys request a view; Shift steps 15 degrees.`);
   }
   function update(next) {
@@ -282,13 +284,17 @@ export function mountViewMap(root, {onRequest, onColors}) {
       lastRaster = raster;
     }
     // Value-based key also handles selected-series arrays recreated (or mutated) by the parent.
-    const sampleKey = JSON.stringify([colorSignature(current.colors),current.rows.map(r => [r.id,r.heading,r.elevation])]);
+    const sampleKey = JSON.stringify([colorSignature(current.colors),current.rows.map(r => [r.id,r.heading,r.elevation,current.visibleIds?.has(r.id)??true])]);
     if (sampleKey !== lastSamples) {
       samples.replaceChildren();
+      let shown=0;
       for (const row of current.rows) {
         const p = point(row);
-        samples.append(svgNode('circle',{cx:p.x,cy:p.y,r:1.6,'data-row':row.id,fill:rgbCss(current.rgbAt(row.heading,row.elevation))}));
+        const visible=current.visibleIds?.has(row.id)??true;
+        if(visible)shown++;
+        samples.append(svgNode('circle',{cx:p.x,cy:p.y,r:row.symmetry_source?1.2:1.6,'data-row':row.id,'data-visible':String(visible),'data-alias':String(Boolean(row.symmetry_source)),opacity:visible?1:.18,fill:rgbCss(current.rgbAt(row.heading,row.elevation))}));
       }
+      availability.textContent=`${shown.toLocaleString()} / ${current.rows.length.toLocaleString()} views of this shape and paint match the plot filters. All available headings remain on this map.`;
       grid.replaceChildren(); elevationAxis.replaceChildren();
       for (const h of [0,90,180,270,360]) grid.append(svgNode('line',{x1:h,x2:h,y1:0,y2:120}));
       const {elevationMin:low,elevationMax:high} = current.colors;

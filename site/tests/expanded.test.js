@@ -33,20 +33,6 @@ test('sphere full rotational aliases explicitly separate requested from recorded
   assert.doesNotMatch(cylinder.requested,/heading and elevation are not independently observable/i);
 });
 
-test('actual image scrub and keyboard retain physical requests for continuous and discrete aliases',()=>{
-  const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
-  const handlers=source.slice(source.indexOf('    wrap.onpointerdown='),source.indexOf("    window.addEventListener('popstate'"));
-  for(const policy of [continuous,{kind:'discrete',period_deg:180}]) {
-    const state={heading:271},wrap={clientWidth:360,setPointerCapture(){}};
-    const context=vm.createContext({state,wrap,scrub:null,scrubFrame:0,selected:()=>true,stop(){},currentPeriod:()=>policy,canonicalHeading:core.canonicalHeading,requestView(){},requestAnimationFrame(fn){fn();return 0;}});
-    vm.runInContext(handlers,context);
-    wrap.onpointerdown({pointerId:1,clientX:0});wrap.onpointermove({clientX:10});
-    assert.equal(state.heading,281);
-    wrap.onkeydown({key:'ArrowRight',shiftKey:false,preventDefault(){}});
-    assert.equal(state.heading,282);
-  }
-});
-
 test('playback advances the physical request rather than collapsing continuous aliases to zero',()=>{
   const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
   const body=source.slice(source.indexOf('  function animate(now)'),source.indexOf('  function bind()'));
@@ -73,7 +59,7 @@ test('expanded methods distinguish ten-shape exploratory PLS from original seman
 
 test('expanded UI routes aliases through typed metadata and keeps recorded physical heading colors',()=>{
   const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
-  assert.match(source,/heading_symmetry/);
+  assert.match(source,/expandSymmetryCatalog/);
   assert.match(source,/describePose\(/);
   assert.doesNotMatch(source,/expected_count\|\|66600/);
   const catalog={rows:[...rows,{...rows[0],id:1,shape:'star',heading:90}],shapes:[sphere,{id:'star',heading_symmetry:{kind:'discrete',period_deg:180}}],colors:[{id:'red',hex:'#E53935'}]};

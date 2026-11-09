@@ -17,7 +17,7 @@ import tempfile
 
 RUNTIME_FILES = ('index.html', 'app.js', 'core.js', 'style.css', 'view-colors.js',
                  'view-map.js', 'view-map.css', 'plot-annotations.js', 'transport.js',
-                 'diagnostics.js', 'vector-codec.js', 'diagnostics-worker.js')
+                 'diagnostics.js', 'vector-codec.js', 'diagnostics-worker.js', 'symmetry.js', 'coverage.js', 'preview-orbit.js')
 RELEASE_SCHEMA = 'solids-release-v1'
 SYNTHETIC_SCHEMA = 'solids-release-synthetic-test-v1'
 PRODUCTION_BUILD = 'build-81cec6a56ad50b85d5afc982'

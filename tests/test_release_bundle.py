@@ -24,7 +24,7 @@ else:
 
 RUNTIME = ('index.html', 'app.js', 'core.js', 'style.css', 'view-colors.js',
            'view-map.js', 'view-map.css', 'plot-annotations.js', 'transport.js',
-           'diagnostics.js', 'vector-codec.js', 'diagnostics-worker.js')
+           'diagnostics.js', 'vector-codec.js', 'diagnostics-worker.js', 'symmetry.js', 'coverage.js', 'preview-orbit.js')
 
 
 def encoded(obj):

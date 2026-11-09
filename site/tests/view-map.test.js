@@ -36,6 +36,19 @@ function fire(node,type,fields={}){
   return event;
 }
 
+test('view map retains available views while identifying filtered-out symmetry aliases',()=>{
+  const {root}=fixture(),controller=map.mountViewMap(root,{onRequest(){},onColors(){}});
+  const source={id:1,heading:0,elevation:0},alias={id:2,heading:180,elevation:0,symmetry_source:source};
+  const update={colors:state(),rgbAt:()=>[12,34,56],rows:[source,alias],visibleIds:new Set([1]),requested:{heading:180,elevation:0},recorded:null};
+  controller.update(update);
+  assert.equal(by(root,'data-row','2').getAttribute('data-visible'),'false');
+  assert.equal(by(root,'data-row','2').getAttribute('data-alias'),'true');
+  assert.match(by(root,'class','view-map-availability').textContent,/1 \/ 2 views/);
+  controller.update({...update,visibleIds:new Set([1,2]),recorded:alias});
+  assert.equal(by(root,'data-row','2').getAttribute('opacity'),'1');
+  assert.match(by(root,'class','view-map-readout').textContent,/Symmetry view 180°.*source 0°/);
+});
+
 test('mounted map shows only supplied actual rows, separate requested/recorded markers, cached colors and clean teardown', () => {
   assert.equal(typeof map.mountViewMap,'function');
   const {root}=fixture(), calls=[];

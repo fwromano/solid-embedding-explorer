@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {sourceId} from '../symmetry.js';
 const app=await import('../app.js').catch(()=>({}));
 const source=await readFile(new URL('../app.js',import.meta.url),'utf8');
 
@@ -16,12 +17,13 @@ class Element {
  setAttribute(key,value){this.attributes[key]=value;}
  removeAttribute(key){delete this.attributes[key];delete this[key];}
 }
-function diagnosticsHarness(respond=()=>null){
+function diagnosticsHarness(respond=()=>null,alias=false){
  const elements=new Map(),requests=[],rows=[1931,1932,1933].map(id=>({id,image:`/${id}.png`,heading:id-1931,elevation:0,color:'red',shape:'cube'}));
  const state={selectedId:1931,dimensions:768},catalog={build_id:'build-test'};
+ if(alias){rows.push({id:9000,heading:180,elevation:0,shape:'cube',color:'red',symmetry_source:rows[0]});state.selectedId=9000;}
  const $=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};
- const context=vm.createContext({$,state,catalog,byId:new Map(rows.map(row=>[row.id,row])),selected:()=>rows.find(row=>row.id===state.selectedId),
-  assetURL:value=>value,document:{createElement:()=>new Element()},AbortController,neighborVersion:0,iouVersion:0,neighborsAbort:null,neighborTimer:0,playing:false,errorStatus:null,diagnosticErrors:new Map(),
+ const context=vm.createContext({$,state,catalog,sourceId,byId:new Map(rows.map(row=>[row.id,row])),selected:()=>rows.find(row=>row.id===state.selectedId),
+  assetURL:value=>value,document:{createElement:()=>new Element()},AbortController,neighborVersion:0,iouVersion:0,neighborsAbort:null,neighborTimer:0,playing:false,errorStatus:null,imageError:null,diagnosticErrors:new Map(),
   clearTimeout(){},setTimeout(){return 1;},stop(){},changed(){},selectRow(id){state.selectedId=id;},apiURL:app.apiURL,
   requestJSON:(url,options)=>app.requestJSON(url,options,async(url,options)=>{
    const parsed=new URL(url,'http://local'),endpoint=parsed.pathname.split('/').pop(),id=Number(parsed.searchParams.get('id'));
@@ -44,8 +46,18 @@ test('reference-only HTTP 503 preserves healthy global neighbors, IoU and galler
  assert.equal(h.$('reference-gallery').children.length,1,'healthy gallery must render');
  assert.match(h.$('reference-score').textContent,/unavailable.*503/);
  await h.$('neighbors').children[0].children[2].onclick();
- assert.match(h.$('iou-result').textContent,/Rows 1931 ↔ 1933: binary IoU 0.9000/);
+ assert.match(h.$('iou-result').textContent,/Source rows 1931 ↔ 1933: binary IoU 0.9000/);
  assert.deepEqual(h.requests.map(r=>r.endpoint),['neighbors','reference','reference-gallery','iou']);
+});
+
+test('symmetry view diagnostics and IoU use the measured source row ID',async()=>{
+ const h=diagnosticsHarness(()=>null,true);
+ h.schedule();await h.load();await h.context.compareIoU(9000);
+ assert.deepEqual(h.requests.map(request=>request.id),[1931,1931,1931,1931]);
+ assert.equal(h.state.selectedId,9000);
+ assert.equal(h.$('reference-score').dataset.queryId,'1931');
+ assert.match(h.$('iou-result').textContent,/Source rows 1931 ↔ 1931/);
+ assert.equal(h.error(),null);
 });
 
 test('selection changes clear stale reference identity, cosine and link before failure or recovery',async()=>{
@@ -294,4 +306,16 @@ test('selection commits only matching loaded image; stale image loads cannot cha
  assert.deepEqual(commits,[[220,'image220']]);
  const pending=gate.run(300,()=>new Promise(r=>resolve=r),(id,value)=>commits.push([id,value]));
  gate.cancel();resolve('image300');await pending;assert.equal(commits.length,1);
+});
+
+test('late image failures cannot override a newer preview for the same row',async()=>{
+ for(const cancel of [false,true]){
+  const gate=app.createSelectionGate();let reject;const commits=[];
+  const stale=gate.run(7,()=>new Promise((_,fail)=>reject=fail),(id,image)=>commits.push(image));
+  if(cancel)gate.cancel();else await gate.run(7,async()=> 'new RGB',(id,image)=>commits.push(image));
+  reject(Error('old mask failed'));assert.equal(await stale,false);
+  assert.deepEqual(commits,cancel?[]:['new RGB']);
+ }
+ const gate=app.createSelectionGate();
+ await assert.rejects(gate.run(7,async()=>{throw Error('current image failed');},()=>assert.fail('must not commit')),/current image failed/);
 });

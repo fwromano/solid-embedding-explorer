@@ -2,6 +2,8 @@
 
 The accepted Python viewer stays untouched. This project publishes the same 94,200 real rows on GitHub Pages and computes diagnostics in a dedicated browser worker. No server/API backend and no inference.
 
+The frontend derives 540,000 full-heading views from that immutable source catalog in `site/symmetry.js`. Measured rows retain their IDs; each added view has a distinct view ID, a physical heading and a `symmetry_source` reference to its measured row. Projection offsets and diagnostic requests always resolve through that source row. Transport counts, hashes, vector arrays, source catalog downloads and fitted cohorts remain the 94,200 measured rows. Full-heading mapping CSVs include source array indices to materialize repetitions without re-encoding. Aliases are display/export entries, not additional measurements or independent neighbors.
+
 All published file paths below are safe relative paths resolved against `new URL('.', import.meta.url)` in site/transport.js. Never resolve against domain root or allow traversal/foreign origins. Original virtual URLs `/data/...` and `/dataset/...` remain in row metadata and app protocol, mapped explicitly by transport. No global fetch monkeypatch.
 
 `site/deployment.json`:

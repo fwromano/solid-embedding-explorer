@@ -1,5 +1,6 @@
 // Pure, package-free math and state. Catalog IDs are never array indices.
 import {parseColorState,appendColorParams} from './view-colors.js';
+import {sourceRow} from './symmetry.js';
 export const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));
 export function projectionVariance(ratio,mode='3d') {
   if(!ratio)return null;
@@ -31,9 +32,11 @@ export function describePose(shape, heading, elevation, recorded=null) {
   const meaning=full?'Ideal full rotational alias: heading and elevation are not independently observable.':continuous?'Ideal continuous heading alias: heading is not independently observable.':`Canonical ${angle(canonical)}°; period ${policy.period_deg}°.`;
   const approximation=continuous?` ${policy.pixel_equivalence||'Approximate finite-mesh raster; not a pixel-equivalence guarantee'}.`:'';
   const request=`Requested ${angle(heading)}° / ${angle(elevation)}°.`;
-  const actual=recorded?` Recorded ${recorded.heading}° / ${recorded.elevation}°.`:'';
+  const source=recorded&&sourceRow(recorded);
+  const alias=Boolean(recorded?.symmetry_source);
+  const actual=recorded?`${alias?` Symmetry view ${recorded.heading}° / ${recorded.elevation}°; reuses source embedding ${source.id}.`:''} Recorded ${source.heading}° / ${source.elevation}°.`:'';
   const exact=recorded&&circularDistance(recorded.heading,heading,policy)<1e-6&&Math.abs(recorded.elevation-elevation)<1e-6;
-  return {summary:`${request} ${meaning}${approximation} Nearest actual encoded view.`,requested:`${request}${actual} ${meaning}${approximation}`,badge:continuous?'Ideal rotational alias':exact?'Exact view':'Nearest encoded'};
+  return {summary:`${request} ${meaning}${approximation} Full-heading views reuse source embeddings.`,requested:`${request}${actual} ${meaning}${approximation}`,badge:alias?'Repeated by symmetry':continuous?'Ideal rotational alias':exact?'Exact view':'Nearest encoded'};
 }
 export const seriesOf = row => `${row.shape}/${row.color}`;
 export function pathRings(rows) {
@@ -61,7 +64,7 @@ export function filterRows(catalog, state) {
   const targets=state.headingMode==='current'?[state.heading]:(state.headings || []);
   const periods=new Map(catalog.shapes.map(s=>[s.id,s.heading_symmetry??s.period])), ids=new Set();
   for (const ring of pathRings(candidates)) for (const target of targets) {
-    const nearest=nearestSample(ring,target,ring[0].elevation,periods.get(ring[0].shape));
+    const nearest=nearestSample(ring,target,ring[0].elevation,catalog.symmetry_expanded?360:periods.get(ring[0].shape));
     if (nearest) ids.add(nearest.id);
   }
   return candidates.filter(row=>ids.has(row.id));
@@ -130,6 +133,7 @@ export function projector(bounds,state,width,height) {
 }
 const littleEndian = new Uint8Array(new Uint32Array([1]).buffer)[0]===1;
 export function packColor(r,g,b) {return (littleEndian?(255<<24)|(b<<16)|(g<<8)|r:(r<<24)|(g<<16)|(b<<8)|255)>>>0;}
+export function unpackColor(value) {return littleEndian?[value&255,(value>>>8)&255,(value>>>16)&255]:[(value>>>24)&255,(value>>>16)&255,(value>>>8)&255];}
 export function createRaster(width,height) {
   const bytes=new Uint8ClampedArray(width*height*4);
   return {width,height,bytes,pixels:new Uint32Array(bytes.buffer),depth:new Float64Array(width*height),ids:new Int32Array(width*height)};
